@@ -1,0 +1,22 @@
+/* .PlayVideo,
+.SideBar{
+    display: flex;
+} */
+.container {
+    display: flex;
+}
+.buttons{
+    display: flex;
+}
+.instruction{
+    display: flex;
+}
+.hide {
+    display: none;
+    background-color: aquamarine;
+}
+.instruction:hover + .hide {
+    display: block;
+}
+
+
