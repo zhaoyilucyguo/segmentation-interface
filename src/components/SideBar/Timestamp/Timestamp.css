@@ -1,4 +1,4 @@
-table {
+/* table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
     width: 80%;
@@ -6,11 +6,12 @@ table {
   }
   
   td, th {
-    border: 1px solid #dddddd;
+    border: 1px solid black;
     text-align: left;
-    padding: 8px;
+    padding: 1%;
   }
-  
-  tr:nth-child(even) {
-    background-color: #dddddd;
-  }
+  */
+  /* table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  } */

@@ -1,8 +1,18 @@
-/* .PlayVideo,
+/* .PlayVideo, */
 .SideBar{
-    display: flex;
-} */
-.container {
+    padding-right: 1%;
+    padding-left: 1%;
+    padding-top: 4.3%;
+    width: 30%;
+}
+.PlayVideo{
+    width: 70%;
+    padding-right: 1%;
+}
+#video{
+    width: 100%;
+}
+.content {
     display: flex;
 }
 .buttons{
@@ -11,16 +21,48 @@
 .instruction{
     display: flex;
 }
-.hide {
-    display: none;
-    background-color: aquamarine;
-}
-.instruction:hover + .hide {
-    display: block;
-}
 .sidebarVideo {
-    width: 100%;
+    width: 60%;
     height: auto;
+}
+.viewHeader {
+    display: flex;
+    width: 100%;
+}
+input {
+    width: 100%;
+}
+.plus,
+.plusT {
+    display: none;
+}
+/* .TimeStamp {
+    padding-top: 3%;
+} */
+.TimestampHeader{
+    display: flex;
+}
+.video-preview{
+    display: flex;
+}
+.SwitchView,
+.TimeStamp,
+.Feedback {
+    border-style: groove;
+    border-radius: 1%;
+}
+.submit{
+    float: right;
+}
+.next{
+    float: right;
+}
+.check{
+    width: 25px;
+    height: 25px;
+}
+textarea{
+    width: 100%
 }
 
 

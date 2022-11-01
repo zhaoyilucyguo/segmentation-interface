@@ -1,11 +1,5 @@
-/* .App {
-  text-align: center;
+NavLink {
+  text-decoration: none;
+  display: block;
+  float: left;
 }
-.container{
-  width: 90%;
-} */
-
-/* .mainContent{
-  display:flex;
-  flex-direction: row;
-} */
