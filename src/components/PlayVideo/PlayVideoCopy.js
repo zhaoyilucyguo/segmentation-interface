@@ -47,11 +47,21 @@ export class PlayVideoCopy extends Component {
       this.setState({ PatientId });
       this.setState({ HandId });
     })
-    axios.get(`http://localhost:5000/Camera`)
-    .then(res => {
-      const Camera =res.data;
-      this.setState({ Camera });
-    })
+    if (this.state.HandId === 1) {
+      axios.get(`http://localhost:5000/CameraLeft`)
+      .then(res => {
+        const Camera =res.data;
+        this.setState({ Camera });
+      })
+    }
+    else {
+      axios.get(`http://localhost:5000/CameraRight`)
+      .then(res => {
+        const Camera =res.data;
+        this.setState({ Camera });
+      })
+    }
+    
     axios.get(`http://localhost:5000/Segment`)
     .then(res => {
       const SegmentJson =res.data;
