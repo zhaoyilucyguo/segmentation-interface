@@ -75,7 +75,6 @@ export class PlayVideoCopy extends Component {
     .then(res => { 
       const data =res.data;
       const videos = data.filter(view => view.PatientTaskHandMappingId === this.state.PatientTaskHandMappingId);
-      console.log(videos);
       this.setState({ videos });
     })
     axios.get(`http://localhost:5000/TaskSegmentCameraMapping`)
@@ -166,7 +165,7 @@ export class PlayVideoCopy extends Component {
     }
     function changeColor(cur, next, time) {
       if (next.value !== ''){
-        if (parseInt(next.value) !== time) {
+        if (Math.abs(parseFloat(next.value) - parseFloat(cur.value)) > 2) {
           next.style.backgroundColor="yellow";
           cur.style.backgroundColor="yellow";
         }
@@ -180,9 +179,11 @@ export class PlayVideoCopy extends Component {
       var time = currentTime;
       var cur = document.getElementById("IN"+String(index));
       cur.readonly=false;
-      cur.value=Math.floor(time*24);
+      // cur.value=Math.floor(time*24);
+      cur.value=time*24;
       cur.readonly=true;
-      VideoSegment.filter(view => view.id === index)[0].StartTime=Math.floor(time*24);
+      // VideoSegment.filter(view => view.id === index)[0].StartTime=Math.floor(time*24);
+      VideoSegment.filter(view => view.id === index)[0].StartTime=time*24;
       var checkBox = document.getElementById("CHECK"+index);
       checkBox.disabled=false;
       document.getElementById("in").disabled=false;
@@ -203,9 +204,11 @@ export class PlayVideoCopy extends Component {
       var time = currentTime;
       var cur = document.getElementById("OUT"+String(index));
       cur.readonly=false;
-      cur.value=Math.floor(time*24);
+      // cur.value=Math.floor(time*24);
+      cur.value=time*24;
       cur.readonly=true;
-      VideoSegment.filter(view => view.id === index)[0].EndTime=Math.floor(time*24);
+      // VideoSegment.filter(view => view.id === index)[0].EndTime=Math.floor(time*24);
+      VideoSegment.filter(view => view.id === index)[0].EndTime=time*24;
       var checkBox = document.getElementById("CHECK"+index);
       checkBox.disabled=false;
       // check ET and IPT
@@ -243,7 +246,6 @@ export class PlayVideoCopy extends Component {
     function onSelect(e) {
       var id=parseInt(e.target.id);
       var count = id-VideoSegment[0].id;
-      console.log(count);
       if (count >= 1 && (VideoSegment[count-1].StartTime === null || VideoSegment[count-1].EndTime === null)) {
         alert("Make sure you have filled out the previous segment entries before you select a new one");
         return;
@@ -252,8 +254,7 @@ export class PlayVideoCopy extends Component {
       cnt = count;
       // background color    
       var row = document.getElementById("ROW"+index);
-      console.log(prevIndex-VideoSegment[0].id);
-      console.log(VideoSegment);
+      
       if (prevIndex !== undefined && prevIndex !== index) {
         if (VideoSegment[prevIndex-VideoSegment[0].id]['IsChecked']===1) {
           document.getElementById("ROW"+prevIndex).style.backgroundColor="rgb(211, 211, 211)";
@@ -301,7 +302,7 @@ export class PlayVideoCopy extends Component {
         if (myDivObjBgColor === "rgba(0, 0, 0, 0)") {
           row.style.backgroundColor="rgb(211, 211, 211)";
         }
-        VideoSegment[id-1].IsChecked=1;  
+        VideoSegment[id-VideoSegment[0].id].IsChecked=1;  
         var logsId = logs.length+1;
         axios.post('http://localhost:5000/logs/'+String(logsId), {
           "id": logsId,
@@ -324,7 +325,7 @@ export class PlayVideoCopy extends Component {
         if (myDivObjBgColor === "rgb(211, 211, 211)") {
           row.style.backgroundColor="rgba(0, 0, 0, 0)";
         } 
-        VideoSegment[id-1].IsChecked=0;         
+        VideoSegment[id-VideoSegment[0].id].IsChecked=0;         
       } 
     }
     function switchView(CameraId){
