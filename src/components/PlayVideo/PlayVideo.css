@@ -2,7 +2,7 @@
 .SideBar{
     padding-right: 1%;
     padding-left: 1%;
-    padding-top: 4.3%;
+    padding-top: 3.6%;
     width: 30%;
 }
 .PlayVideo{
@@ -33,13 +33,15 @@ input {
     width: 100%;
 }
 .plus,
-.plusT {
+.plusT,
+.plusF {
     display: none;
 }
 /* .TimeStamp {
     padding-top: 3%;
 } */
-.TimestampHeader{
+.TimestampHeader,
+.feedbackHeader{
     display: flex;
 }
 .video-preview{
@@ -63,6 +65,12 @@ input {
 }
 textarea{
     width: 100%
+}
+.feedbackTable{
+    width: 100%;
+}
+.submitFeedback{
+    float: right;
 }
 
 

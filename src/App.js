@@ -20,6 +20,7 @@ componentDidMount() {
     axios.get(`http://localhost:5000/PatientTaskHandMapping`)
     .then(res => {
       const PatientTaskHandMapping =res.data;
+      console.log(PatientTaskHandMapping);
       this.setState({ PatientTaskHandMapping });
     })
 }

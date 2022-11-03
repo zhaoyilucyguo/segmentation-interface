@@ -242,8 +242,9 @@ export class PlayVideoCopy extends Component {
     }
     function onSelect(e) {
       var id=parseInt(e.target.id);
-      var count = id-VideoSegment.filter(view => view.PatientTaskHandMappingId === PatientTaskHandMappingId)[0].id;
-      if (count > 1 && (VideoSegment[count-2].StartTime === null || VideoSegment[count-2].EndTime === null)) {
+      var count = id-VideoSegment[0].id;
+      console.log(count);
+      if (count >= 1 && (VideoSegment[count-1].StartTime === null || VideoSegment[count-1].EndTime === null)) {
         alert("Make sure you have filled out the previous segment entries before you select a new one");
         return;
       }
@@ -251,9 +252,10 @@ export class PlayVideoCopy extends Component {
       cnt = count;
       // background color    
       var row = document.getElementById("ROW"+index);
-      console.log(prevIndex);
+      console.log(prevIndex-VideoSegment[0].id);
+      console.log(VideoSegment);
       if (prevIndex !== undefined && prevIndex !== index) {
-        if (VideoSegment[prevIndex-1]['IsChecked']===1) {
+        if (VideoSegment[prevIndex-VideoSegment[0].id]['IsChecked']===1) {
           document.getElementById("ROW"+prevIndex).style.backgroundColor="rgb(211, 211, 211)";
         }
         else {
@@ -286,11 +288,12 @@ export class PlayVideoCopy extends Component {
     }
     function onCheck(id, StartTime, EndTime) {
       var checkBox = document.getElementById("CHECK"+id);
-      if (VideoSegment[id-1].StartTime === null || VideoSegment[id-1].EndTime === null) {
+      if (VideoSegment[id-VideoSegment[0].id].StartTime === null || VideoSegment[id-VideoSegment[0].id].EndTime === null) {
         checkBox.checked=false;
         alert("Make sure you have filled out the segment entries before you check them");
         return;
       }
+      
       // If the checkbox is checked, display the output text
       var row = document.getElementById("ROW"+id);
       let myDivObjBgColor = window.getComputedStyle(row).backgroundColor;
@@ -452,6 +455,18 @@ export class PlayVideoCopy extends Component {
       // document.getElementsByClassName('SideVideos')[0].style.display='block';
       document.getElementsByClassName('TimestampTable')[0].style.display='block';
     }
+    function ClickMinusF(){
+      document.getElementsByClassName('plusF')[0].style.display='block';
+      document.getElementsByClassName('minusF')[0].style.display='none';
+      // document.getElementsByClassName('SideVideos')[0].style.display='none';
+      document.getElementsByClassName('feedbackTable')[0].style.display='none';
+    }
+    function ClickPlusF(){
+      document.getElementsByClassName('minusF')[0].style.display='block';
+      document.getElementsByClassName('plusF')[0].style.display='none';
+      // document.getElementsByClassName('SideVideos')[0].style.display='block';
+      document.getElementsByClassName('feedbackTable')[0].style.display='block';
+    }
     return (
       <div className='container'>  
         {/* <button className='prev' onClick={this.Prev}>Prev</button>  
@@ -481,14 +496,7 @@ export class PlayVideoCopy extends Component {
           </div>          
         </div>
         <div className='SideBar'>
-          <form className='Feedback' onSubmit={(e)=>{
-            submitFeedback(e);
-            {this.setState({Feedback})};
-          }}>
-            <h4>Feedback</h4>
-            <textarea placeholder="Write something"></textarea>
-            <button type="submit" className='submit'>Submit</button>
-          </form>
+         
           <div className='SwitchView'>
             <div className='viewHeader'> 
               <h4>Switch View</h4> 
@@ -515,6 +523,7 @@ export class PlayVideoCopy extends Component {
             } 
             </div>                        
           </div>
+          <timestamp className='timestamp'>
           <form className='TimeStamp' onSubmit={((e)=>{
             submit(e);
             {this.setState({logs})};
@@ -560,12 +569,33 @@ export class PlayVideoCopy extends Component {
                       </tr>
                     )
                 }
+                <td colspan="5"><button type="submit" className='submit'>Submit</button></td>
+                
                 </tbody>
               </table>
-              <button type="submit" className='submit'>Submit</button>
+              
             </div>
           </form>
-          
+          </timestamp>
+          <feedback className='feedback'>
+          <form className='Feedback' onSubmit={(e)=>{
+            submitFeedback(e);
+            {this.setState({Feedback})};
+          }}>
+            <div className='feedbackHeader'>
+            <h4>Feedback</h4>
+            <icons>
+                <div className='plusF'  onClick={ClickPlusF}><AiOutlinePlus/></div>
+                <div className='minusF' onClick={ClickMinusF}><AiOutlineMinus/></div>
+              </icons>
+              </div>
+            <table className='feedbackTable'>
+            <tr><td><textarea placeholder="Write something"></textarea></td></tr>
+            <tr><td colspan="5"><button type="submit" className='submitFeedback'>Submit</button></td></tr>
+            </table>
+            
+          </form>
+          </feedback>
         </div>
         </div>  
       </div>
