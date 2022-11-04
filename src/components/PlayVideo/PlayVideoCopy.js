@@ -14,14 +14,15 @@ export class PlayVideoCopy extends Component {
       videos: [],
       recommended_view: [],
       PatientTaskHandMapping: [],
+      PatientTaskHandMapping1: [],
       Camera: [],
       Feedback: [],
       logs: [],
-      PatientTaskHandMappingId: this.props.dataParentToChild,
+      PatientTaskHandMappingId: this.props.PTHID,
       // PatientTaskHandMappingId: 1,
-      TaskId: undefined,
-      PatientId: undefined,
-      HandId: undefined,
+      TaskId: this.props.TASKID,
+      PatientId: this.props.PATIENTID,
+      HandId: this.props.HANDID,
       Segment: 1, // start at IPT
       SegmentJson: [],
       view: "",
@@ -30,23 +31,26 @@ export class PlayVideoCopy extends Component {
       cnt: 0,
       currentTime: 0,
       CameraId: 0,
-      prevIndex: undefined
+      prevIndex: undefined,
+      update: undefined
     }
     this.render=this.render.bind(this);
   }
   
   componentDidMount() {
+    // const HandId = undefined;
     axios.get(`http://localhost:5000/PatientTaskHandMapping`)
     .then(res => {
       const PatientTaskHandMapping =res.data;
-      const TaskId = PatientTaskHandMapping.filter(view => view.id === this.state.PatientTaskHandMappingId)[0].TaskId;
-      const PatientId = PatientTaskHandMapping.filter(view => view.id === this.state.PatientTaskHandMappingId)[0].PatientId;      
-      const HandId = PatientTaskHandMapping.filter(view => view.id === this.state.PatientTaskHandMappingId)[0].HandId;
       this.setState({ PatientTaskHandMapping });
-      this.setState({ TaskId });
-      this.setState({ PatientId });
-      this.setState({ HandId });
     })
+    // axios.get(`https://localhost:44305/api/Segmentation/GetPatientTaskInformation`)
+    // .then(res => {
+    // const PatientTaskHandMapping1 =res.data;
+    // console.log(PatientTaskHandMapping1);
+    // this.setState({ PatientTaskHandMapping1 });
+    // })
+    // console.log(HandId);
     if (this.state.HandId === 1) {
       axios.get(`http://localhost:5000/CameraLeft`)
       .then(res => {
@@ -71,15 +75,33 @@ export class PlayVideoCopy extends Component {
     axios.get(`http://localhost:5000/VideoSegment`)
     .then(res => {
       const data =res.data;
+      var index = undefined;
+      var update = undefined;
       const VideoSegment = data.filter(view => view.PatientTaskHandMappingId === this.state.PatientTaskHandMappingId);
-      const index = VideoSegment[0].id;
       let i = 0;
-      while (i < VideoSegment.length) {
-        VideoSegment[i]['IsChecked'] = 0;
+      while ( i < VideoSegment.length) {
+        VideoSegment[i]['IsChecked']=0;
         i++;
       }
-      this.setState({ VideoSegment });
+      if (VideoSegment.length > 0){
+        this.setState({ VideoSegment });
+        index = VideoSegment[0].id;
+        update = 1;
+        console.log(VideoSegment);
+      }
+      else {
+        index = data.length+1;
+        update = 0;
+      }
+      
+      // let i = 0;
+      // while (i < VideoSegment.length) {
+      //   VideoSegment[i]['IsChecked'] = 0;
+      //   i++;
+      // }
+      // this.setState({ VideoSegment });
       this.setState({ index });
+      this.setState({ update });
     })
     axios.get(`http://localhost:5000/FileInfo`)
     .then(res => { 
@@ -89,8 +111,26 @@ export class PlayVideoCopy extends Component {
     })
     axios.get(`http://localhost:5000/TaskSegmentCameraMapping`)
     .then(res => {
-      const recommended_view =res.data;
-      const CameraId = recommended_view.filter(view => view.TaskId === this.state.TaskId && view.SegmentId === this.state.Segment)[0].CameraId;
+      const data =res.data;
+      const recommended_view = data.filter(view => view.TaskId === this.state.TaskId);
+      if (this.state.update === 0){
+        let i = 0;
+        var VideoSegment = [];
+        while (i < recommended_view.length) {
+          VideoSegment.push({
+            "id": this.state.index+i,
+            "PatientTaskHandMappingId": this.state.PatientTaskHandMappingId,
+            "SegmentId": recommended_view[i].SegmentId,
+            "StartTime":null,
+            "EndTime":null,
+            "IsChecked": 0
+          });
+          i++;
+        }
+        console.log(VideoSegment);
+        this.setState({ VideoSegment });
+      }      
+      const CameraId = recommended_view.filter(view => view.SegmentId === this.state.Segment)[0].CameraId;
       const view = this.state.Camera.filter(view => view.id === CameraId).ViewType;
       const definition = recommended_view.filter(view => view.TaskId === this.state.TaskId && view.SegmentId === this.state.Segment)[0].Definition;
       this.setState({ recommended_view });
@@ -159,6 +199,7 @@ export class PlayVideoCopy extends Component {
       CameraId, 
       SegmentJson, 
       prevIndex, 
+      update
     } = this.state;
     var currentTime = 0;
     var pauseTime = -1;
@@ -167,14 +208,14 @@ export class PlayVideoCopy extends Component {
       currentTime = e.target.currentTime;
       if (pauseTime >= 0) {
         if (currentTime >= pauseTime) {
-          var vid = document.getElementById("video")
+          var vid = document.getElementById("video");
           vid.pause();
           pauseTime = -1;
         }
       }
     }
     function changeColor(cur, next, time) {
-      if (next.value !== ''){
+      if (next.value){
         if (Math.abs(parseFloat(next.value) - parseFloat(cur.value)) > 2) {
           next.style.backgroundColor="yellow";
           cur.style.backgroundColor="yellow";
@@ -190,10 +231,10 @@ export class PlayVideoCopy extends Component {
       var cur = document.getElementById("IN"+String(index));
       cur.readonly=false;
       // cur.value=Math.floor(time*24);
-      cur.value=time*24;
+      cur.value=time*30;
       cur.readonly=true;
       // VideoSegment.filter(view => view.id === index)[0].StartTime=Math.floor(time*24);
-      VideoSegment.filter(view => view.id === index)[0].StartTime=time*24;
+      VideoSegment.filter(view => view.id === index)[0].StartTime=time*30;
       var checkBox = document.getElementById("CHECK"+index);
       checkBox.disabled=false;
       document.getElementById("in").disabled=false;
@@ -215,10 +256,10 @@ export class PlayVideoCopy extends Component {
       var cur = document.getElementById("OUT"+String(index));
       cur.readonly=false;
       // cur.value=Math.floor(time*24);
-      cur.value=time*24;
+      cur.value=time*30;
       cur.readonly=true;
       // VideoSegment.filter(view => view.id === index)[0].EndTime=Math.floor(time*24);
-      VideoSegment.filter(view => view.id === index)[0].EndTime=time*24;
+      VideoSegment.filter(view => view.id === index)[0].EndTime=time*30;
       var checkBox = document.getElementById("CHECK"+index);
       checkBox.disabled=false;
       // check ET and IPT
@@ -231,9 +272,12 @@ export class PlayVideoCopy extends Component {
       else if (Segment === "IPT") {
         var next = document.getElementById("OUT"+String(index+1));
         var nextnext = document.getElementById("IN"+String(index+2));
-        if (next.value !== '' && parseInt(next.value) !== time) {
-          next.style.backgroundColor="yellow";
-          cur.style.backgroundColor="yellow";
+        console.log(next.value);
+        if (next.value) {
+          if (parseInt(next.value) !== time) {
+            next.style.backgroundColor="yellow";
+            cur.style.backgroundColor="yellow";
+          }
         }
         changeColor(cur, nextnext, time);
       }
@@ -283,19 +327,19 @@ export class PlayVideoCopy extends Component {
       document.getElementById("instruction").innerHTML="Please Select the IN and OUT Points for the Segment "+Segment;
       definition=recommended_view.filter(view => view.TaskId === TaskId && view.SegmentId === SegmentId)[0].Definition;
       CameraId = recommended_view.filter(view => view.TaskId === TaskId && view.SegmentId === SegmentId)[0].CameraId;
-      document.getElementById("video").currentTime=document.getElementById("IN"+index).value/24;
+      document.getElementById("video").currentTime=document.getElementById("IN"+index).value/30;
     }    
     function selectTimestamp(id) {
       var time = document.getElementById(id);
-      document.getElementById("video").currentTime=time.value/24;
+      document.getElementById("video").currentTime=time.value/30;
     }
     function onPlay(id) {
       var time = document.getElementById("IN"+id);
       var vid = document.getElementById("video")
-      vid.currentTime=time.value/24;
+      vid.currentTime=time.value/30;
       vid.play();
       time = document.getElementById("OUT"+id);
-      pauseTime = time.value/24;
+      pauseTime = time.value/30;
     }
     function onCheck(id, StartTime, EndTime) {
       var checkBox = document.getElementById("CHECK"+id);
@@ -392,19 +436,24 @@ export class PlayVideoCopy extends Component {
       let i = 0;
       var id = VideoSegment[0].id;
       while (i < VideoSegment.length) {
-        axios.put('http://localhost:5000/VideoSegment/'+String(id), {
-          "id": id,
-          "PatientTaskHandMappingId": VideoSegment.filter(view => view.id === id)[0].PatientTaskHandMappingId,
-          "SegmentId": VideoSegment.filter(view => view.id === id)[0].SegmentId,
-          "StartTime": VideoSegment.filter(view => view.id === id)[0].StartTime,
-          "EndTime": VideoSegment.filter(view => view.id === id)[0].EndTime
-        })
-        .then(response => {
-            console.log(response)
-        })
-        .catch(error => {
-            console.log(error)
-        })
+        if (update == 1){
+          axios.put('http://localhost:5000/VideoSegment/'+String(id), {
+            "id": id,
+            "PatientTaskHandMappingId": VideoSegment.filter(view => view.id === id)[0].PatientTaskHandMappingId,
+            "SegmentId": VideoSegment.filter(view => view.id === id)[0].SegmentId,
+            "StartTime": VideoSegment.filter(view => view.id === id)[0].StartTime,
+            "EndTime": VideoSegment.filter(view => view.id === id)[0].EndTime
+          })
+        }
+        else {
+          axios.post('http://localhost:5000/VideoSegment/'+String(id), {
+            "id": id,
+            "PatientTaskHandMappingId": VideoSegment.filter(view => view.id === id)[0].PatientTaskHandMappingId,
+            "SegmentId": VideoSegment.filter(view => view.id === id)[0].SegmentId,
+            "StartTime": VideoSegment.filter(view => view.id === id)[0].StartTime,
+            "EndTime": VideoSegment.filter(view => view.id === id)[0].EndTime
+          })
+        }       
         var logsId = logs.length+1;
         axios.post('http://localhost:5000/logs/'+String(logsId), {
           "id": logsId,

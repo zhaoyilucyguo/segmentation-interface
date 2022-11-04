@@ -43,7 +43,14 @@ componentDidMount() {
         (
             list=>
             <>
-            <Route path={"/Segmentation"+list.id} element={<PlayVideoCopy dataParentToChild={list.id} />}/>
+            <Route path={"/Segmentation"+list.id} element={
+            <PlayVideoCopy 
+            PTHID={list.id} 
+            HANDID={list.HandId}
+            PATIENTID={list.PatientId}
+            TASKID={list.TaskId}
+            />
+            }/>
             </>
         )
         }
