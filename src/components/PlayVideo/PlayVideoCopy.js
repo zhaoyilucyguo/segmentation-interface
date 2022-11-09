@@ -73,16 +73,16 @@ export class PlayVideoCopy extends Component {
       // const VideoSegment = data.filter(view => view.PatientTaskHandMappingId === this.state.PatientTaskHandMappingId);
       
       // if (this.state.IsSubmitted===1){
-      if (Object.keys(GetSegment).length === 0){
-        var VideoSegment = GetSegment['submittedSegments'];
-        var segmentHistories = GetSegment['segmentHistories'];
+      if (GetSegment.length){
+        var VideoSegment = GetSegment;
+        // var segmentHistories = GetSegment['segmentHistories'];
         let i = 0;
         while ( i < VideoSegment.length) {
           VideoSegment[i]['IsChecked']=0;
           i++;
         }
         this.setState({ VideoSegment });
-        this.setState({ segmentHistories });
+        // this.setState({ segmentHistories });
         this.setState({ GetSegment });
         index = VideoSegment[0].id;
       }
@@ -110,12 +110,12 @@ export class PlayVideoCopy extends Component {
       console.log('files', videos);
       this.setState({ videos });
       // if (this.state.IsSubmitted === 0){
-      if (Object.keys(this.state.GetSegment).length === 0){
+      if (this.state.GetSegment.length === 0){
         let i = 0;
         var VideoSegment = [];
         while (i < recommended_view.length) {
           VideoSegment.push({
-            "id": this.state.index+i,
+            // "id": this.state.index+i,
             "patientTaskHandMappingId": this.state.PatientTaskHandMappingId,
             "segmentId": recommended_view[i].segmentId,
             "start":null,
@@ -368,7 +368,7 @@ export class PlayVideoCopy extends Component {
           "segmentId": id,
           "start": start,
           "end": end,
-          "isSubmitted": 0
+          "isSubmitted": false
         })   
       } else {
         if (myDivObjBgColor === "rgb(211, 211, 211)") {
@@ -430,6 +430,7 @@ export class PlayVideoCopy extends Component {
           return;
         }
         submittedSegments.push({
+          "id": VideoSegment[j]['id'] ? VideoSegment[j]['id'] : 0,
           "patientTaskHandMappingId": VideoSegment[j]['patientTaskHandMappingId'],
           "segmentId": VideoSegment[j]['segmentId'],
           "start": VideoSegment[j]['start'],
@@ -438,11 +439,12 @@ export class PlayVideoCopy extends Component {
         j++;
       }
       
-      GetSegment['submittedSegments']=VideoSegment;
-      GetSegment['segmentHistories']=segmentHistories;
-      console.log(GetSegment);
+      let model = { 'submittedSegments' : submittedSegments, 'segmentHistories': segmentHistories}
+      // GetSegment['submittedSegments']=submittedSegments;
+      // GetSegment['segmentHistories']=segmentHistories;
+      console.log('post model', model);
       
-      axios.post('http://localhost:5000/VideoSegment/', GetSegment);
+      axios.post('http://localhost:5000/VideoSegment/', model);
       // axios.put('http://localhost:5000/PatientTaskHandMapping/'+String(PatientTaskHandMappingId), {
       //   "id": PatientTaskHandMappingId,
       //   "PatientId": PatientId,
