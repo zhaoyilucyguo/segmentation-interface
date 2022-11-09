@@ -3,9 +3,6 @@ import axios from 'axios';
 import './PlayVideo.css'
 import { AiFillInfoCircle, AiOutlinePlus, AiOutlineMinus, AiFillPlayCircle } from "react-icons/ai/";
 import '../SideBar/Timestamp/Timestamp.css';
-import VideoPlayer from 'react-video-player-extended';
-// import { Video } from '../Video/Video';
-// import { ReactPlayer } from 'react-player';
 
 
 export class PlayVideoCopy extends Component {  
@@ -14,7 +11,7 @@ export class PlayVideoCopy extends Component {
     this.state = {
       VideoSegment: [],
       segmentHistories: [],
-      GetSegment: [],
+      GetSegment: {},
       videos: [],
       recommended_view: [],
       // PatientTaskHandMapping: [],
@@ -36,10 +33,7 @@ export class PlayVideoCopy extends Component {
       currentTime: 0,
       cameraId: 0,
       prevIndex: undefined,
-      isPlaying: false,
       timeStart: 0,
-      
-
     }
     
     this.render=this.render.bind(this);
@@ -79,7 +73,7 @@ export class PlayVideoCopy extends Component {
       // const VideoSegment = data.filter(view => view.PatientTaskHandMappingId === this.state.PatientTaskHandMappingId);
       
       // if (this.state.IsSubmitted===1){
-      if (GetSegment.length>0){
+      if (Object.keys(GetSegment).length === 0){
         var VideoSegment = GetSegment['submittedSegments'];
         var segmentHistories = GetSegment['segmentHistories'];
         let i = 0;
@@ -116,7 +110,7 @@ export class PlayVideoCopy extends Component {
       console.log('files', videos);
       this.setState({ videos });
       // if (this.state.IsSubmitted === 0){
-      if (this.state.GetSegment.length===0){
+      if (Object.keys(this.state.GetSegment).length === 0){
         let i = 0;
         var VideoSegment = [];
         while (i < recommended_view.length) {
@@ -208,7 +202,6 @@ export class PlayVideoCopy extends Component {
       prevIndex, 
       IsSubmitted,
       currentTime,
-      isPlaying,
       timeStart
     } = this.state;
     var pauseTime = -1;
@@ -218,7 +211,7 @@ export class PlayVideoCopy extends Component {
       currentTime = e.target.currentTime;
       if (pauseTime >= 0) {
         if (currentTime >= pauseTime) {
-          var vid = document.getElementsByClassName("react-video-player")[0]
+          var vid = document.getElementById("video");
           vid.pause();
           pauseTime = -1;
         }
@@ -331,17 +324,17 @@ export class PlayVideoCopy extends Component {
       // definition=recommended_view.filter(view => view.TaskId === TaskId && view.segmentId === segmentId)[0].Definition;
       cameraId = recommended_view.filter(view => view.segmentId === segmentId)[0].cameraId;
       console.log('onSelect cameraId', cameraId);
-      document.getElementsByClassName("react-video-player")[0].currentTime=document.getElementById("IN"+index).value/30;
+      document.getElementById("video").currentTime=document.getElementById("IN"+index).value/30;
     }    
     function selectTimestamp(position, id) {
       onSelect(id);
       var time = document.getElementById(position+String(id));
-      console.log(document.getElementsByClassName("react-video-player")[0].currentTime);
-      document.getElementsByClassName("react-video-player")[0].currentTime=time.value/30;
+      console.log(document.getElementById("video").currentTime);
+      document.getElementById("video").currentTime=time.value/30;
     }
     function onPlayback(id) {
       var time = document.getElementById("IN"+id);
-      var vid = document.getElementsByClassName("react-video-player")[0];
+      var vid = document.getElementById("video");
       vid.currentTime=time.value/30;
       // timeStart = time.value/30;
       vid.play();
@@ -386,10 +379,10 @@ export class PlayVideoCopy extends Component {
       console.log(segmentHistories);
     }
     function switchView(cameraId){
-      var logsId = GetSegment.length+1;
+      // var logsId = GetSegment.length+1;
       console.log("camera id", cameraId);
       segmentHistories.push({
-        "id": logsId,
+        // "id": logsId,
         "patientId": PatientId,
         "taskId": TaskId,
         "cameraId": cameraId, //update onSelect
@@ -399,7 +392,7 @@ export class PlayVideoCopy extends Component {
         "end": VideoSegment.filter(view => view.id === index)[0].end,
         "isSubmitted": 0
       })
-      var vid = document.getElementsByClassName("react-video-player")[0];
+      var vid = document.getElementById("video");
       vid.currentTime=0;
     }
     function submitFeedback(e){
@@ -502,13 +495,6 @@ export class PlayVideoCopy extends Component {
       // document.getElementsByClassName('SideVideos')[0].style.display='block';
       document.getElementsByClassName('feedbackTable')[0].style.display='block';
     }
-    
-   
-  
-    
-  
-    
-   
     return (
       <div className='container'>  
         {/* <button className='prev' onClick={this.Prev}>Prev</button>  
@@ -521,36 +507,7 @@ export class PlayVideoCopy extends Component {
                 <div className="video-play">
                   <h2>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h2>
                   {/* <h2>Patient {PatientId}, Task {TaskId}</h2> */}
-                  {/* <video id="video" src={"./Videos/"+video.fileName} onTimeUpdate={onTimeUpdate} controls='controls'></video> */}
-                  <VideoPlayer
-                    url={"./Videos/"+video.fileName}
-                    controls={controls}
-                    isPlaying={isPlaying}
-                    loop={false}
-                    height={'auto'}
-                    width={'100%'}
-                    // timeStart={timeStart}
-                    onPlay={() => {
-                      // debugger;
-                      this.setState({isPlaying: true})
-                    }}
-                    onPause={() => {this.setState({isPlaying: false})}}
-                    onProgress={(e)=>{
-                      // debugger;
-                      console.log('Current time: ', e.target.currentTime);
-                      if (pauseTime > 0 && e.target.currentTime >= pauseTime) {
-                        console.log('pausetime', pauseTime);
-                        var vid = document.getElementsByClassName("react-video-player")[0]
-                        vid.pause();
-                        this.setState({isPlaying: false});
-                        pauseTime = -1;
-                      }
-                      {this.setState({currentTime: e.target.currentTime})};
-                    }}
-                    onDuration={(duration)=>console.log('Duration: ', duration)}
-                    onVideoPlayingComplete={() => {this.setState({isPlaying: false})}}
-                    fps={fps}
-                  />
+                  <video id="video" src={"./Videos/"+video.fileName} onTimeUpdate={onTimeUpdate} controls='controls'></video>
                 </div>
               )
             }
@@ -581,7 +538,6 @@ export class PlayVideoCopy extends Component {
                 videos.filter(video => video.cameraId !== this.state.cameraId)
                 .map(video=>
                   <div className="video-preview" onClick={() => {
-                    {this.setState({isPlaying: false})};
                     switchView(video.cameraId);
                     {this.setState({cameraId: video.cameraId})};
                   }}>
@@ -623,7 +579,6 @@ export class PlayVideoCopy extends Component {
                         <tr  id={"ROW"+segment.id}>
                           <td  id={segment.id} 
                           onClick={(e) => {
-                            {this.setState({isPlaying: false})};
                             onSelect(e.target.id);
                             this.setState({cameraId});
                             this.setState({definition});
@@ -641,7 +596,6 @@ export class PlayVideoCopy extends Component {
                             () => {
                               onPlayback(String(segment.id));
                               // this.setState({timeStart});
-                              this.setState({isPlaying: true});
                               // this.setState({timeStart: 0});
                             }}><AiFillPlayCircle size={30}/></div></td>
                         </tr>
