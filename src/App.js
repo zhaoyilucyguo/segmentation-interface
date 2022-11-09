@@ -17,6 +17,7 @@ class App extends Component{
     this.render=this.render.bind(this);
 }
 componentDidMount() {
+  // axios.get('https://localhost:44305/api/Segmentation/GetPatientTaskInformation',{ crossdomain: true })
     axios.get(`http://localhost:5000/PatientTaskHandMapping`)
     .then(res => {
       const PatientTaskHandMapping =res.data;
@@ -26,6 +27,19 @@ componentDidMount() {
 }
 
   render(){
+    // const response = fetch("https://localhost:44305/api/Segmentation/GetPatientTaskInformation", {
+    //     method: "GET",
+    //     mode: "cors",
+    //     headers: {
+    //       'content-type': 'application/json; charset=utf-8 ',
+    //       'date': 'Mon,07 Nov 2022 18:57:39 GMT ',
+    //       'server': 'Microsoft-IIS/10.0 ',
+    //       'x-powered-by': 'ASP.NET '
+    //     },
+    //     body: JSON.stringify(data),
+    // });
+    // console.log(response.json());
+
     function navTo(){
       document.getElementsByTagName("ul")[0].style.display="none";
     }
@@ -46,9 +60,10 @@ componentDidMount() {
             <Route path={"/Segmentation"+list.id} element={
             <PlayVideoCopy 
             PTHID={list.id} 
-            HANDID={list.HandId}
-            PATIENTID={list.PatientId}
-            TASKID={list.TaskId}
+            HANDID={list.handId}
+            PATIENTID={list.patientId}
+            TASKID={list.taskId}
+            IsSubmitted={list.IsSubmitted}
             />
             }/>
             </>
@@ -56,7 +71,7 @@ componentDidMount() {
         }
      </Routes>  
      <ul>
-     {
+     {/* {
         this.state.PatientTaskHandMapping.filter(list => list.IsSubmitted === 1)
         .map
         (
@@ -68,15 +83,15 @@ componentDidMount() {
             </NavLink>
             </li>
         )
-      } 
+      }  */}
       {
-        this.state.PatientTaskHandMapping.filter(list => list.IsSubmitted === 0)
+        this.state.PatientTaskHandMapping//.filter(list => list.IsSubmitted === 0)
         .map
         (
             list=>
             <li>
             <NavLink to={"/Segmentation"+list.id} id={list.id} onClick={navTo}>
-              Segmentation {list.id}: Patient {list.PatientId}, Task {list.TaskId}, Hand {list.HandId} 
+              Segmentation {list.id}: Patient {list.patientId}, Task {list.taskId}, Hand {list.handId} 
             </NavLink>
             </li>
         )

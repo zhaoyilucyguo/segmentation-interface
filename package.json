@@ -13,7 +13,8 @@
     "react-icons": "^4.4.0",
     "react-router-dom": "^6.4.2",
     "react-scripts": "^5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "react-video-player-extended": "^9.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
