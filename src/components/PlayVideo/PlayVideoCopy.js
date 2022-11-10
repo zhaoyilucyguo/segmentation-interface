@@ -1,4 +1,4 @@
-import React, {Component, setState} from 'react';
+import React, {Component} from 'react';
 import axios from 'axios';
 import './PlayVideo.css'
 import { AiFillInfoCircle, AiOutlinePlus, AiOutlineMinus, AiFillPlayCircle } from "react-icons/ai/";
@@ -24,16 +24,14 @@ export class PlayVideoCopy extends Component {
       PatientId: this.props.PATIENTID,
       HandId: this.props.HANDID,
       IsSubmitted: this.props.IsSubmitted,
-      Segment: 1, // start at IPT
+      SegmentId: 1, // start at IPT
       SegmentJson: [],
       view: "",
       definition: "",
       index: 0,
-      cnt: 0,
       currentTime: 0,
       cameraId: 0,
       prevIndex: undefined,
-      timeStart: 0,
     }
     
     this.render=this.render.bind(this);
@@ -83,7 +81,7 @@ export class PlayVideoCopy extends Component {
         }
         this.setState({ VideoSegment });
         // this.setState({ segmentHistories });
-        this.setState({ GetSegment });
+        // this.setState({ GetSegment });
         index = VideoSegment[0].id;
       }
       else {
@@ -110,7 +108,7 @@ export class PlayVideoCopy extends Component {
       console.log('files', videos);
       this.setState({ videos });
       // if (this.state.IsSubmitted === 0){
-      if (this.state.GetSegment.length === 0){
+      if (this.state.VideoSegment.length === 0){
         let i = 0;
         var VideoSegment = [];
         while (i < recommended_view.length) {
@@ -127,7 +125,7 @@ export class PlayVideoCopy extends Component {
         console.log('videosegment', VideoSegment);
         this.setState({ VideoSegment });
       }      
-      const cameraId = recommended_view.filter(view => view.segmentId === this.state.Segment)[0].cameraId;
+      const cameraId = recommended_view.filter(view => view.segmentId === this.state.SegmentId)[0].cameraId;
       console.log('cameraid', cameraId);
       const view = this.state.Camera.filter(view => view.id === cameraId).ViewType;
       // const definition = recommended_view.filter(view => view.TaskId === this.state.TaskId && view.segmentId === this.state.Segment)[0].Definition;
@@ -184,7 +182,7 @@ export class PlayVideoCopy extends Component {
       VideoSegment,
       segmentHistories,
       // submittedSegments,
-      GetSegment,
+      // GetSegment,
       videos,
       recommended_view,
       TaskId,
@@ -194,7 +192,7 @@ export class PlayVideoCopy extends Component {
       PatientTaskHandMapping,
       definition,
       index, 
-      cnt, 
+      segmentId,
       Camera, 
       Feedback,
       cameraId, 
@@ -202,11 +200,8 @@ export class PlayVideoCopy extends Component {
       prevIndex, 
       IsSubmitted,
       currentTime,
-      timeStart
     } = this.state;
     var pauseTime = -1;
-    var fps=30;
-    var controls = ['Play', 'Time', 'Progress', 'Volume', 'FullScreen', 'NextFrame', 'LastFrame'];
     function onTimeUpdate(e){
       currentTime = e.target.currentTime;
       if (pauseTime >= 0) {
@@ -230,76 +225,77 @@ export class PlayVideoCopy extends Component {
       }
     }
     function IN() {
-      console.log(currentTime);
+      // const selectedSegmentId = this.state.s
+      console.log("segment id in", segmentId);
       var time = currentTime;
-      var cur = document.getElementById("IN"+String(index));
+      var cur = document.getElementById("IN"+String(segmentId));
+      console.log("input", cur);
       cur.readonly=false;
       cur.value=Math.floor(time*30);
-      // cur.value=time*30;
       cur.readonly=true;
-      VideoSegment.filter(view => view.id === index)[0].start=Math.floor(time*30);
-      // VideoSegment.filter(view => view.id === index)[0].start=time*30;
-      var checkBox = document.getElementById("CHECK"+index);
+      VideoSegment.filter(view => view.segmentId === segmentId)[0].start=Math.floor(time*30);
+      var checkBox = document.getElementById("CHECK"+segmentId);
       checkBox.disabled=false;
       document.getElementById("in").disabled=false;
       document.getElementById("out").disabled=false;
-      var segmentId = VideoSegment.filter(view => view.id === index)[0].segmentId;
       console.log("segmentid", segmentId);
       var Segment = SegmentJson.filter(view => view.id === segmentId)[0].SegmentLabel;
       if (Segment === "M&TR") {
-        var prevprev = document.getElementById("OUT"+String(index-2));
+        var prevprev = document.getElementById("OUT"+String(segmentId-2));
         changeColor(cur, prevprev, time);
       }
-      else if (index-VideoSegment[0].id > 1) {
-        var prev = document.getElementById("OUT"+String(index-1));
+      else if (segmentId > 1) {
+        var prev = document.getElementById("OUT"+String(segmentId-1));
         changeColor(cur, prev, time);
       }
       // check this IN and previous OUT
     }
     function OUT() { 
+      console.log("segment id out", segmentId);
       var time = currentTime;
-      var cur = document.getElementById("OUT"+String(index));
+      var cur = document.getElementById("OUT"+String(segmentId));
       cur.readonly=false;
       cur.value=Math.floor(time*30);
-      // cur.value=time*30;
       cur.readonly=true;
-      VideoSegment.filter(view => view.id === index)[0].end=Math.floor(time*30);
-      // VideoSegment.filter(view => view.id === index)[0].end=time*30;
-      var checkBox = document.getElementById("CHECK"+index);
+      VideoSegment.filter(view => view.id === segmentId)[0].end=Math.floor(time*30);
+      var checkBox = document.getElementById("CHECK"+segmentId);
       checkBox.disabled=false;
       // check ET and IPT
-      var segmentId = VideoSegment.filter(view => view.id === index)[0].segmentId;
       var Segment = SegmentJson.filter(view => view.id === segmentId)[0].SegmentLabel;
       if (Segment === "ET") {
-        var prev = document.getElementById("OUT"+String(index-1));
+        var prev = document.getElementById("OUT"+String(segmentId-1));
         changeColor(cur, prev, time);
       }
       else if (Segment === "IPT") {
-        var next = document.getElementById("OUT"+String(index+1));
-        var nextnext = document.getElementById("IN"+String(index+2));
-        console.log(next.value);
-        if (next.value) {
-          if (parseInt(next.value) !== time) {
-            next.style.backgroundColor="yellow";
+        var nextOut = document.getElementById("OUT"+String(segmentId+1));
+        var nextnextIn = document.getElementById("IN"+String(segmentId+2));
+        console.log(nextOut.value);
+        if (nextOut.value) {
+          if (parseInt(nextOut.value) !== time) {
+            nextOut.style.backgroundColor="yellow";
             cur.style.backgroundColor="yellow";
           }
         }
-        changeColor(cur, nextnext, time);
+        changeColor(cur, nextnextIn, time);
       }
-      else if (index-VideoSegment[0].id > 0 && index-VideoSegment[0].id < VideoSegment.length) {
-        var next = document.getElementById("IN"+String(index+1));
-        changeColor(cur, next, time);
+      else if (segmentId> 1 && segmentId < VideoSegment.length-1) {
+        var nextIn = document.getElementById("IN"+String(segmentId+1));
+        changeColor(cur, nextIn, time);
       }
     }
-    function onSelect(id) {
+    function onSelect(segmentId) {
       // var id=parseInt(e.target.id);
-      var count = id-VideoSegment[0].id;
-      if (count >= 1 && (VideoSegment[count-1].start === null || VideoSegment[count-1].end === null)) {
-        alert("Make sure you have filled out the previous segment entries before you select a new one");
-        return;
-      }
-      index=parseInt(id);
-      cnt = count;
+      // var count = id-VideoSegment[0].id;
+      // this.state.selectedSegment = segmentId;
+      console.log("segmentId", segmentId);
+      if (segmentId > 1){
+        var segment = VideoSegment.filter(segment => segment.segmentId === segmentId)[0];
+        if (segment.start === null || segment.end === null) {
+          alert("Make sure you have filled out the previous segment entries before you select a new one");
+          return;
+        }
+      } 
+      index=parseInt(segmentId);
       // background color    
       var row = document.getElementById("ROW"+index);
       
@@ -316,15 +312,12 @@ export class PlayVideoCopy extends Component {
       // in and out buttons
       document.getElementById("out").disabled=false;
       document.getElementById("in").disabled=false;
-      
-      var segmentId = VideoSegment.filter(view => view.id === index)[0].segmentId;
-      console.log(segmentId);
+      console.log("segment id inside on select", segmentId);
       var Segment = SegmentJson.filter(view => view.id === segmentId)[0].SegmentLabel;
       document.getElementById("instruction").innerHTML="Please Select the IN and OUT Points for the Segment "+Segment;
       // definition=recommended_view.filter(view => view.TaskId === TaskId && view.segmentId === segmentId)[0].Definition;
       cameraId = recommended_view.filter(view => view.segmentId === segmentId)[0].cameraId;
       console.log('onSelect cameraId', cameraId);
-      document.getElementById("video").currentTime=document.getElementById("IN"+index).value/30;
     }    
     function selectTimestamp(position, id) {
       onSelect(id);
@@ -541,7 +534,7 @@ export class PlayVideoCopy extends Component {
                 .map(video=>
                   <div className="video-preview" onClick={() => {
                     switchView(video.cameraId);
-                    {this.setState({cameraId: video.cameraId})};
+                    this.setState({cameraId: video.cameraId});
                   }}>
                     <video src={"./Videos/"+video.fileName} title={"./Videos/"+video.fileName} className="sidebarVideo"  id={video.View}></video>
                     <div>
@@ -578,18 +571,18 @@ export class PlayVideoCopy extends Component {
                   {
                     VideoSegment
                       .map(segment =>
-                        <tr  id={"ROW"+segment.id}>
-                          <td  id={segment.id} 
-                          onClick={(e) => {
-                            onSelect(e.target.id);
+                        <tr  id={"ROW"+segment.segmentId}>
+                          <td  id={segment.segmentId} 
+                          onClick={() => {
+                            onSelect(segment.segmentId);
                             this.setState({cameraId});
                             this.setState({definition});
                             this.setState({prevIndex});
-                            this.setState({index});
+                            this.setState({segmentId: segment.segmentId});
                           }
                           }>{SegmentJson.filter(view => view.id === segment.segmentId)[0].SegmentLabel}</td>
-                          <td><input value={segment.start} type="number" id={"IN"+String(segment.id)} onClick={(() => selectTimestamp("IN", segment.id))} readOnly="readOnly"></input></td>
-                          <td><input value={segment.end} type="number" id={"OUT"+String(segment.id)} onClick={(() => selectTimestamp("OUT", segment.id))} readOnly="readOnly"></input></td>
+                          <td><input value={segment.start} type="number" id={"IN"+String(segment.segmentId)} onClick={(() => selectTimestamp("IN", segment.id))} readOnly="readOnly"></input></td>
+                          <td><input value={segment.end} type="number" id={"OUT"+String(segment.segmentId)} onClick={(() => selectTimestamp("OUT", segment.id))} readOnly="readOnly"></input></td>
                           <td><input className="check" type="checkbox" onClick={(() => {
                             onCheck(String(segment.id), segment.start, segment.end);
                             this.setState({segmentHistories});
@@ -614,7 +607,7 @@ export class PlayVideoCopy extends Component {
             <div className='feedback'>
             <form className='Feedback' onSubmit={(e)=>{
               submitFeedback(e);
-              {this.setState({Feedback})};
+              this.setState({Feedback});
             }}>
               <div className='feedbackHeader'>
               <h4>Feedback</h4>
