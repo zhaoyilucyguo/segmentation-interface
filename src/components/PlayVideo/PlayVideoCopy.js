@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import axios from 'axios';
 import './PlayVideo.css'
-import { AiFillInfoCircle, AiOutlinePlus, AiOutlineMinus, AiFillPlayCircle } from "react-icons/ai/";
+import { AiFillPlayCircle } from "react-icons/ai/";
 import '../SideBar/Timestamp/Timestamp.css';
+import { Video } from '../Video/Video';
 
 
 export class PlayVideoCopy extends Component {  
@@ -29,7 +30,8 @@ export class PlayVideoCopy extends Component {
       currentTime: 0,
       cameraId: 0,
       prevSegmentId: 1,
-      instruction: "Please Select the IN and OUT Points for the Segment IPT"
+      instruction: "Please Select the IN and OUT Points for the Segment IPT",
+      timeEnd: -1
     }
     
     // this.render=this.render.bind(this);
@@ -142,14 +144,15 @@ export class PlayVideoCopy extends Component {
       prevSegmentId, 
       IsSubmitted,
       currentTime,
-      instruction
+      instruction,
+      timeEnd
     } = this.state;
     var pauseTime = -1;
     function onTimeUpdate(e){
       currentTime = e.target.currentTime;
       if (pauseTime >= 0) {
         if (currentTime >= pauseTime) {
-          var vid = document.getElementById("video");
+          var vid = document.getElementsByClassName("react-video-player")[0];
           vid.pause();
           pauseTime = -1;
         }
@@ -253,18 +256,18 @@ export class PlayVideoCopy extends Component {
     }    
     function selectTimestamp(position, id) {
       var time = VideoSegment.filter(segment => segment.segmentId === id)[0][position];
-      document.getElementById("video").currentTime=time/30;
+      document.getElementsByClassName("react-video-player")[0].currentTime=time/30;
     }
     function onPlayback(segmentId) {
       
       var start = VideoSegment.filter(segment => segment.segmentId === segmentId)[0]['start'];
       var end = VideoSegment.filter(segment => segment.segmentId === segmentId)[0]['end'];
       console.log(start/30, end/30);
-      var vid = document.getElementById("video");
-      document.getElementById("video").currentTime=start/30;
-      // timeStart = time.value/30;
+      var vid = document.getElementsByClassName("react-video-player")[0];
+      document.getElementsByClassName("react-video-player")[0].currentTime=start/30;
       vid.play();
-      pauseTime = end/30;
+      pauseTime = (end-7)/30;
+      // timeEnd = end/30;
     }
     function onCheck(id, start, end) {
       var segment = VideoSegment.filter(segment => segment.segmentId === id)[0];
@@ -311,8 +314,8 @@ export class PlayVideoCopy extends Component {
         "end": VideoSegment.filter(view => view.segmentId === segmentId)[0].end,
         "isSubmitted": 0
       })
-      var vid = document.getElementById("video");
-      vid.currentTime=0;
+      // var vid = document.getElementsByClassName("react-video-player")[0];
+      // vid.currentTime=0;
     }
     function submitFeedback(e){
       e.preventDefault();
@@ -364,9 +367,7 @@ export class PlayVideoCopy extends Component {
       axios.post('http://localhost:5000/VideoSegment/', model);
       alert("You have successfully submitted the timestamp!");
     }
-    function ShowDef() {
-      alert(definition);
-    }
+    
     return (
       
         <div className='content' key='content'>
@@ -377,7 +378,8 @@ export class PlayVideoCopy extends Component {
                 <div className="video-play" key={video.fileName}>
                   <h2>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h2>
                   {/* <h2>Patient {PatientId}, Task {TaskId}</h2> */}
-                  <video id="video" src={"./Videos/"+video.fileName} onTimeUpdate={onTimeUpdate} controls='controls'></video>
+                  {/* <video id="video" src={"./Videos/"+video.fileName} onTimeUpdate={onTimeUpdate} controls='controls'></video> */}
+                  <Video url={"./Videos/"+video.fileName}></Video>
                 </div>
               )
             }
@@ -387,10 +389,9 @@ export class PlayVideoCopy extends Component {
                 this.setState({VideoSegment});
               }}>IN</button>
               <div className="instruction">
-                <h5 id="instruction" onClick={ShowDef}>
+                <h5 id="instruction">
                 {instruction}
                 </h5>              
-                <AiFillInfoCircle/>
               </div>          
               <button id="out" onClick={()=>{
                 OUT();
@@ -470,6 +471,7 @@ export class PlayVideoCopy extends Component {
                           <td><div onClick={
                             () => {
                               onPlayback(segment.segmentId);
+                              this.setState({timeEnd});
                             }}><AiFillPlayCircle size={30}/></div></td>
                         </tr>
                       )

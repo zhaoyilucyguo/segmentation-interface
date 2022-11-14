@@ -1,3 +1,4 @@
+import { setSelectionRange } from '@testing-library/user-event/dist/utils';
 import React, { Component } from 'react';
 import VideoPlayer from 'react-video-player-extended';
 
@@ -7,7 +8,8 @@ export class Video extends Component {
       this.state = {
         url: this.props.url,
         isPlaying: this.props.isPlaying,
-        timeStart: this.props.timeStart
+        timeStart: this.props.timeStart,
+        timeEnd: this.props.timeEnd
       };
     }
      
@@ -16,13 +18,18 @@ export class Video extends Component {
         var { 
             url, 
             isPlaying,
-            timeStart
+            timeStart,
+            timeEnd
           } = this.state;
         var fps=30;
         const controls = ['Play', 'Time', 'Progress', 'NextFrame', 'LastFrame', 'FullScreen'];
         function handleProgress(e) {
         console.log('Current time: ', e.target.currentTime);
-        
+        if (timeEnd > -1) {
+          if (timeEnd <= e.target.currentTime) {
+            this.setState({isPlaying: false});
+          }
+        }
         }
     
         function handleDuration(duration) {
@@ -40,7 +47,9 @@ export class Video extends Component {
                     timeStart={timeStart}
                     onPlay={()=>{this.setState({isPlaying: true})}}
                     onPause={()=>{this.setState({isPlaying: false})}}
-                    onProgress={handleProgress}
+                    onProgress={(e)=>{
+                      handleProgress(e);
+                    }}
                     onDuration={handleDuration}
                     onVideoPlayingComplete={()=>{this.setState({isPlaying: false})}}
                     fps={fps}
