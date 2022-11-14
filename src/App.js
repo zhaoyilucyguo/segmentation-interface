@@ -14,7 +14,7 @@ class App extends Component{
     this.state = {
       PatientTaskHandMapping: []
     }
-    this.render=this.render.bind(this);
+    // this.render=this.render.bind(this);
 }
 componentDidMount() {
   // axios.get('https://localhost:44305/api/Segmentation/GetPatientTaskInformation',{ crossdomain: true })
@@ -51,6 +51,7 @@ componentDidMount() {
     <h1><NavLink to="/" onClick={navBack}>ARAT Segmentation</NavLink></h1>
     <hr width="100%"></hr>  
     <Routes> 
+      <Route path='/' element={null} />
         {
         this.state.PatientTaskHandMapping
         .map
