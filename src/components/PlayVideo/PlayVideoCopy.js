@@ -80,7 +80,8 @@ export class PlayVideoCopy extends Component {
     axios.get(`http://localhost:5000/TaskSegmentCameraMapping/`+this.state.PatientTaskHandMappingId)
     .then(res => {
       const data =res.data;
-      const recommended_view = data['taskSegmentHandCameraMapping'];//.filter(view => view.taskId === this.state.TaskId);
+      // const recommended_view = data['taskSegmentHandCameraMapping'];
+      const recommended_view = data['rec_view'].filter(view => view.taskId === this.state.TaskId);
       console.log("recommended_view", recommended_view);
       const videos = data['files'];
       this.setState({ videos });
@@ -106,8 +107,8 @@ export class PlayVideoCopy extends Component {
       }      
       const cameraId = recommended_view.filter(view => view.segmentId === this.state.segmentId)[0].cameraId;
       const view = this.state.Camera.filter(view => view.id === cameraId).ViewType;
-      // const definition = recommended_view.filter(view => view.TaskId === this.state.TaskId && view.segmentId === this.state.Segment)[0].Definition;
-      const definition = "undefined";
+      const definition = recommended_view.filter(view => view.segmentId === this.state.segmentId)[0].Definition;
+      // const definition = "undefined";
       this.setState({ recommended_view });
       this.setState({ cameraId });
       this.setState({ view });
@@ -183,7 +184,12 @@ export class PlayVideoCopy extends Component {
         changeColor(segmentId, "IN", segmentId-2, "OUT");
       }
       if (segmentId > 3) {
-        changeColor(segmentId, "IN", segmentId-1, "OUT");
+        if (VideoSegment.length > 4) {
+          if (segmentId === 6) changeColor(segmentId, "IN", 3, "OUT");
+          else if (segmentId === 5) changeColor(segmentId, "IN", 6, "OUT");
+          else if (segmentId === 4) changeColor(segmentId, "IN", 5, "OUT");
+        }
+        else changeColor(segmentId, "IN", segmentId-1, "OUT");
       }
     }
     function OUT() { 
@@ -197,8 +203,15 @@ export class PlayVideoCopy extends Component {
       else if (segmentId === 2) {
         changeColor(segmentId, "OUT", segmentId-1, "OUT");
       }
-      else if (segmentId> 1 && segmentId < VideoSegment.length-1) {
-        changeColor(segmentId, "OUT", segmentId+1, "IN");
+      else if (segmentId> 1) {
+        if (VideoSegment.length > 4) {
+          if (segmentId === 3) changeColor(segmentId, "OUT", 6, "IN");
+          else if (segmentId === 6) changeColor(segmentId, "OUT", 5, "IN");
+          else if (segmentId === 5) changeColor(segmentId, "OUT", 4, "IN");
+        }
+        else {
+          if (segmentId < VideoSegment.length-1) changeColor(segmentId, "OUT", segmentId+1, "IN");
+        }
       }
     }
     function onSelect(id) {
@@ -235,7 +248,7 @@ export class PlayVideoCopy extends Component {
       // document.getElementById("in").disabled=false;
       var Segment = SegmentJson.filter(view => view.id === parseInt(segmentId))[0].SegmentLabel;
       instruction="Please Select the IN and OUT Points for the Segment "+Segment;
-      // definition=recommended_view.filter(view => view.TaskId === TaskId && view.segmentId === segmentId)[0].Definition;
+      definition=recommended_view.filter(view => view.segmentId === segmentId)[0].Definition;
       cameraId = recommended_view.filter(view => view.segmentId === parseInt(segmentId))[0].cameraId;
     }    
     function selectTimestamp(position, id) {
@@ -376,7 +389,6 @@ export class PlayVideoCopy extends Component {
               <div className="instruction">
                 <h5 id="instruction" onClick={ShowDef}>
                 {instruction}
-
                 </h5>              
                 <AiFillInfoCircle/>
               </div>          
@@ -384,7 +396,8 @@ export class PlayVideoCopy extends Component {
                 OUT();
                 this.setState({VideoSegment});
               }}>OUT</button>
-            </div>          
+            </div> 
+            <p>{definition}</p>         
           </div>
           <div className='SideBar' key='SideBar'>
             <div className='SwitchView'>
@@ -462,10 +475,8 @@ export class PlayVideoCopy extends Component {
                       )
                   }
                   <tr><td colSpan="5"><button type="submit" className='submit'>Submit</button></td></tr>
-                  
                   </tbody>
                 </table>
-                
               </div>
             </form>
             </div>
@@ -476,9 +487,7 @@ export class PlayVideoCopy extends Component {
             }}>
               <div className='feedbackHeader'>
               <h4>Feedback</h4>
-           
                 </div>
-            
               <table className='feedbackTable'>
                 <tbody>
                   <tr><td><textarea placeholder="Write something"></textarea></td></tr>
