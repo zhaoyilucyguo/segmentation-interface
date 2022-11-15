@@ -9,28 +9,23 @@ export class Video extends Component {
         url: this.props.url,
         isPlaying: this.props.isPlaying,
         timeStart: this.props.timeStart,
-        timeEnd: this.props.timeEnd
+        currentTime: undefined
       };
     }
-     
+    handleProgress = (e) => {
+      this.setState({currentTime: e.target.currentTime});
+      this.props.sendTime(this.state.currentTime);
+    } 
     
     render() { 
         var { 
             url, 
             isPlaying,
-            timeStart,
-            timeEnd
+            timeStart
           } = this.state;
         var fps=30;
         const controls = ['Play', 'Time', 'Progress', 'NextFrame', 'LastFrame', 'FullScreen'];
-        function handleProgress(e) {
-        console.log('Current time: ', e.target.currentTime);
-        if (timeEnd > -1) {
-          if (timeEnd <= e.target.currentTime) {
-            this.setState({isPlaying: false});
-          }
-        }
-        }
+        
     
         function handleDuration(duration) {
         console.log('Duration: ', duration)
@@ -48,7 +43,7 @@ export class Video extends Component {
                     onPlay={()=>{this.setState({isPlaying: true})}}
                     onPause={()=>{this.setState({isPlaying: false})}}
                     onProgress={(e)=>{
-                      handleProgress(e);
+                      this.handleProgress(e);
                     }}
                     onDuration={handleDuration}
                     onVideoPlayingComplete={()=>{this.setState({isPlaying: false})}}

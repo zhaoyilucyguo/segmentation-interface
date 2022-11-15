@@ -26,12 +26,14 @@ export class PlayVideoCopy extends Component {
       segmentId: 1, // start at IPT
       SegmentJson: [],
       view: "",
-      definition: "",
+      // definition: "",
       currentTime: 0,
       cameraId: 0,
       prevSegmentId: 1,
       instruction: "Please Select the IN and OUT Points for the Segment IPT",
-      timeEnd: -1
+      timeStart: 0,
+      timeEnd: -1,
+      isPlaying: false
     }
     
     // this.render=this.render.bind(this);
@@ -82,9 +84,8 @@ export class PlayVideoCopy extends Component {
     axios.get(`http://localhost:5000/TaskSegmentCameraMapping/`+this.state.PatientTaskHandMappingId)
     .then(res => {
       const data =res.data;
-      // const recommended_view = data['taskSegmentHandCameraMapping'];
-      const recommended_view = data['rec_view'].filter(view => view.taskId === this.state.TaskId);
-      console.log("recommended_view", recommended_view);
+      const recommended_view = data['taskSegmentHandCameraMapping'];
+      // const recommended_view = da ta['rec_view'].filter(view => view.taskId === this.state.TaskId);
       const videos = data['files'];
       this.setState({ videos });
       var VideoSegment = this.state.VideoSegment;
@@ -109,12 +110,12 @@ export class PlayVideoCopy extends Component {
       }      
       const cameraId = recommended_view.filter(view => view.segmentId === this.state.segmentId)[0].cameraId;
       const view = this.state.Camera.filter(view => view.id === cameraId).ViewType;
-      const definition = recommended_view.filter(view => view.segmentId === this.state.segmentId)[0].Definition;
+      // const definition = recommended_view.filter(view => view.segmentId === this.state.segmentId)[0].Definition;
       // const definition = "undefined";
       this.setState({ recommended_view });
       this.setState({ cameraId });
       this.setState({ view });
-      this.setState({ definition });
+      // this.setState({ definition });
     })
     axios.get(`http://localhost:5000/Feedback`)
       .then(res => { 
@@ -122,7 +123,16 @@ export class PlayVideoCopy extends Component {
         this.setState({ Feedback });
     })
   }
-  
+  getTime = (currentTime) => {
+    this.setState({currentTime: currentTime});
+    if (this.state.timeEnd > -1 && this.state.timeEnd <= currentTime) {
+      this.setState({isPlaying: false});
+      this.setState({timeEnd: -1});
+      var vid = document.getElementsByClassName("react-video-player")[0];
+      vid.pause();
+    }
+
+  }
   render() { 
     
     var { 
@@ -135,7 +145,7 @@ export class PlayVideoCopy extends Component {
       HandId,
       PatientTaskHandMappingId,
       PatientTaskHandMapping,
-      definition,
+      // definition,
       segmentId,
       Camera, 
       Feedback,
@@ -145,19 +155,11 @@ export class PlayVideoCopy extends Component {
       IsSubmitted,
       currentTime,
       instruction,
-      timeEnd
+      timeStart,
+      timeEnd,
+      isPlaying
     } = this.state;
-    var pauseTime = -1;
-    function onTimeUpdate(e){
-      currentTime = e.target.currentTime;
-      if (pauseTime >= 0) {
-        if (currentTime >= pauseTime) {
-          var vid = document.getElementsByClassName("react-video-player")[0];
-          vid.pause();
-          pauseTime = -1;
-        }
-      }
-    }
+   
     function changeColor(id1, btn1, id2, btn2) {
       var segment1 = VideoSegment.filter(segment=> segment.segmentId === id1)[0];
       var segment2 = VideoSegment.filter(segment=> segment.segmentId === id2)[0];
@@ -251,7 +253,7 @@ export class PlayVideoCopy extends Component {
       // document.getElementById("in").disabled=false;
       var Segment = SegmentJson.filter(view => view.id === parseInt(segmentId))[0].SegmentLabel;
       instruction="Please Select the IN and OUT Points for the Segment "+Segment;
-      definition=recommended_view.filter(view => view.segmentId === segmentId)[0].Definition;
+      // definition=recommended_view.filter(view => view.segmentId === segmentId)[0].Definition;
       cameraId = recommended_view.filter(view => view.segmentId === parseInt(segmentId))[0].cameraId;
     }    
     function selectTimestamp(position, id) {
@@ -259,15 +261,15 @@ export class PlayVideoCopy extends Component {
       document.getElementsByClassName("react-video-player")[0].currentTime=time/30;
     }
     function onPlayback(segmentId) {
-      
       var start = VideoSegment.filter(segment => segment.segmentId === segmentId)[0]['start'];
       var end = VideoSegment.filter(segment => segment.segmentId === segmentId)[0]['end'];
-      console.log(start/30, end/30);
+      console.log("start at ", start/30, " end at ", end/30);
+      timeStart=start/30;
+      timeEnd = (end-9)/30;
+      isPlaying = true;
       var vid = document.getElementsByClassName("react-video-player")[0];
-      document.getElementsByClassName("react-video-player")[0].currentTime=start/30;
+      vid.currentTime = start/30;
       vid.play();
-      pauseTime = (end-7)/30;
-      // timeEnd = end/30;
     }
     function onCheck(id, start, end) {
       var segment = VideoSegment.filter(segment => segment.segmentId === id)[0];
@@ -379,7 +381,7 @@ export class PlayVideoCopy extends Component {
                   <h2>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h2>
                   {/* <h2>Patient {PatientId}, Task {TaskId}</h2> */}
                   {/* <video id="video" src={"./Videos/"+video.fileName} onTimeUpdate={onTimeUpdate} controls='controls'></video> */}
-                  <Video url={"./Videos/"+video.fileName}></Video>
+                  <Video url={"./Videos/"+video.fileName} timeStart={timeStart} sendTime={this.getTime} isPlaying={isPlaying}></Video>
                 </div>
               )
             }
@@ -398,7 +400,7 @@ export class PlayVideoCopy extends Component {
                 this.setState({VideoSegment});
               }}>OUT</button>
             </div> 
-            <p>{definition}</p>         
+            {/* <p>{definition}</p>          */}
           </div>
           <div className='SideBar' key='SideBar'>
             <div className='SwitchView'>
@@ -451,7 +453,7 @@ export class PlayVideoCopy extends Component {
                           onClick={() => {
                             onSelect(segment.segmentId);
                             this.setState({cameraId});
-                            this.setState({definition});
+                            // this.setState({definition});
                             this.setState({instruction});
                             this.setState({prevSegmentId});
                             this.setState({segmentId});
@@ -472,6 +474,8 @@ export class PlayVideoCopy extends Component {
                             () => {
                               onPlayback(segment.segmentId);
                               this.setState({timeEnd});
+                              this.setState({isPlaying})
+                              this.setState({timeStart});
                             }}><AiFillPlayCircle size={30}/></div></td>
                         </tr>
                       )
