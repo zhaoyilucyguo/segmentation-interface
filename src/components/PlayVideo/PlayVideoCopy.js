@@ -31,9 +31,8 @@ export class PlayVideoCopy extends Component {
       cameraId: 0,
       prevSegmentId: 1,
       instruction: "Please Select the IN and OUT Points for the Segment IPT",
-      timeStart: 0,
       timeEnd: -1,
-      isPlaying: false
+      Update: 0
     }
     
     // this.render=this.render.bind(this);
@@ -79,6 +78,7 @@ export class PlayVideoCopy extends Component {
         }
         VideoSegment[0]["color"]="#AFE1AF";
         this.setState({ VideoSegment });
+        this.setState({Update: 1});
       }
     })
     axios.get(`http://localhost:5000/TaskSegmentCameraMapping/`+this.state.PatientTaskHandMappingId)
@@ -96,8 +96,8 @@ export class PlayVideoCopy extends Component {
           VideoSegment.push({
             "patientTaskHandMappingId": this.state.PatientTaskHandMappingId,
             "segmentId": recommended_view[i].segmentId,
-            "start":undefined,
-            "end":undefined,
+            "start":"",
+            "end":"",
             "IsChecked": 0,
             "inColor": "white",
             "outColor": "white",
@@ -126,7 +126,6 @@ export class PlayVideoCopy extends Component {
   getTime = (currentTime) => {
     this.setState({currentTime: currentTime});
     if (this.state.timeEnd > -1 && this.state.timeEnd <= currentTime) {
-      this.setState({isPlaying: false});
       this.setState({timeEnd: -1});
       var vid = document.getElementsByClassName("react-video-player")[0];
       vid.pause();
@@ -155,9 +154,8 @@ export class PlayVideoCopy extends Component {
       IsSubmitted,
       currentTime,
       instruction,
-      timeStart,
       timeEnd,
-      isPlaying
+      Update
     } = this.state;
    
     function changeColor(id1, btn1, id2, btn2) {
@@ -182,7 +180,16 @@ export class PlayVideoCopy extends Component {
         }
       }
     }
+    function cancelCheck(id) {
+      var checkBox = document.getElementById("CHECK"+id);
+      var check = VideoSegment.filter(segment=> segment.segmentId === id)[0].IsChecked;
+      if (check === 1) {
+        checkBox.checked=false;
+        VideoSegment.filter(segment=> segment.segmentId === id)[0].IsChecked = 0;
+      }
+    }
     function IN() {
+      cancelCheck(segmentId);
       var time = currentTime;
       VideoSegment.filter(view => view.segmentId === segmentId)[0].start=Math.floor(time*30);
       if (segmentId === 3) {
@@ -198,6 +205,7 @@ export class PlayVideoCopy extends Component {
       }
     }
     function OUT() { 
+      cancelCheck(segmentId);
       var time = currentTime;
       console.log(segmentId, VideoSegment.filter(view => view.segmentId === segmentId));
       VideoSegment.filter(view => view.segmentId === segmentId)[0]["end"]=Math.floor(time*30);
@@ -230,7 +238,7 @@ export class PlayVideoCopy extends Component {
         }
         else check = id-1;
         var segment = VideoSegment.filter(segment => segment.segmentId === check)[0];
-        if (segment.start === undefined || segment.end === undefined) {
+        if (segment.start === "" || segment.end === "") {
           alert("Make sure you have filled out the previous segment entries before you select a new one");
           segmentId = id-1;
           return;
@@ -258,15 +266,17 @@ export class PlayVideoCopy extends Component {
     }    
     function selectTimestamp(position, id) {
       var time = VideoSegment.filter(segment => segment.segmentId === id)[0][position];
+      if (time === "") {
+        alert("Cannot find the frame of the video with an empty timestamp!");
+        return;
+      }
       document.getElementsByClassName("react-video-player")[0].currentTime=time/30;
     }
     function onPlayback(segmentId) {
       var start = VideoSegment.filter(segment => segment.segmentId === segmentId)[0]['start'];
       var end = VideoSegment.filter(segment => segment.segmentId === segmentId)[0]['end'];
       console.log("start at ", start/30, " end at ", end/30);
-      timeStart=start/30;
       timeEnd = (end-9)/30;
-      isPlaying = true;
       var vid = document.getElementsByClassName("react-video-player")[0];
       vid.currentTime = start/30;
       vid.play();
@@ -274,7 +284,7 @@ export class PlayVideoCopy extends Component {
     function onCheck(id, start, end) {
       var segment = VideoSegment.filter(segment => segment.segmentId === id)[0];
       var checkBox = document.getElementById("CHECK"+id);
-      if (segment.start === undefined || segment.end === undefined) {
+      if (segment.start === "" || segment.end === "") {
         checkBox.checked=false;
         alert("Make sure you have filled out the segment entries before you check them");
         return;
@@ -378,10 +388,10 @@ export class PlayVideoCopy extends Component {
               videos.filter(video => video.cameraId === this.state.cameraId)
               .map(video=>
                 <div className="video-play" key={video.fileName}>
-                  <h2>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h2>
+                  <h1>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h1>
                   {/* <h2>Patient {PatientId}, Task {TaskId}</h2> */}
                   {/* <video id="video" src={"./Videos/"+video.fileName} onTimeUpdate={onTimeUpdate} controls='controls'></video> */}
-                  <Video url={"./Videos/"+video.fileName} timeStart={timeStart} sendTime={this.getTime} isPlaying={isPlaying}></Video>
+                  <Video url={"./Videos/"+video.fileName} sendTime={this.getTime}></Video>
                 </div>
               )
             }
@@ -391,9 +401,9 @@ export class PlayVideoCopy extends Component {
                 this.setState({VideoSegment});
               }}>IN</button>
               <div className="instruction">
-                <h5 id="instruction">
+                <h2 id="instruction">
                 {instruction}
-                </h5>              
+                </h2>              
               </div>          
               <button id="out" onClick={()=>{
                 OUT();
@@ -405,7 +415,7 @@ export class PlayVideoCopy extends Component {
           <div className='SideBar' key='SideBar'>
             <div className='SwitchView'>
               <div className='viewHeader'> 
-                <h4>Switch View</h4> 
+                <h1 >Switch View</h1> 
              
               </div>
               <div className='SideVideos'>
@@ -418,7 +428,7 @@ export class PlayVideoCopy extends Component {
                   }}>
                     <video src={"./Videos/"+video.fileName} title={"./Videos/"+video.fileName} className="sidebarVideo"  id={video.View}></video>
                     <div>
-                      <p>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</p>
+                      <h2>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h2>
                     </div>
                   </div>
                 )
@@ -432,16 +442,17 @@ export class PlayVideoCopy extends Component {
               this.setState({PatientTaskHandMapping});
             })}>
               <div className='TimestampHeader'>
-                <h4>Timestamp Record</h4>
+                <h1>Timestamp Record</h1>
               
               </div>
-              <div className='TimestampTable'>
-                <table>
+              <div>
+                <table className='TimestampTable'>
                   <thead>
                       <tr>
-                          <th>Segment</th>
-                          <th>IN</th>
-                          <th>OUT</th>
+                          <th className="text-center" >Segment</th>
+                          <th className="text-center" >IN</th>
+                          <th className="text-center" >OUT</th>
+                          <th></th>
                       </tr>
                   </thead>
                   <tbody>
@@ -459,10 +470,10 @@ export class PlayVideoCopy extends Component {
                             this.setState({segmentId});
                           }
                           }>{SegmentJson.filter(view => view.id === segment.segmentId)[0].SegmentLabel}</td>
-                          <td><input value={segment.start} type="number" id={"IN"+String(segment.segmentId)} onClick={(() => {
+                          <td><input className="text-center" value={segment.start} type="number" id={"IN"+String(segment.segmentId)} onClick={(() => {
                             selectTimestamp("start", segment.segmentId);
                           })} readOnly="readOnly" style={{"backgroundColor": segment.inColor}}></input></td>
-                          <td><input value={segment.end} type="number" id={"OUT"+String(segment.segmentId)} onClick={(() => {
+                          <td><input className="text-center" value={segment.end} type="number" id={"OUT"+String(segment.segmentId)} onClick={(() => {
                             selectTimestamp("end", segment.segmentId)
                           })} readOnly="readOnly" style={{"backgroundColor": segment.outColor}}></input></td>
                           <td><input className="check" type="checkbox" onClick={(() => {
@@ -474,13 +485,12 @@ export class PlayVideoCopy extends Component {
                             () => {
                               onPlayback(segment.segmentId);
                               this.setState({timeEnd});
-                              this.setState({isPlaying})
-                              this.setState({timeStart});
                             }}><AiFillPlayCircle size={30}/></div></td>
                         </tr>
                       )
                   }
-                  <tr><td colSpan="5"><button type="submit" className='submit'>Submit</button></td></tr>
+                  <tr><td colSpan="5"><textarea placeholder="Looks like you segmented this task before. Why do you want to update it?"></textarea></td></tr>
+                  <tr><td colSpan="5"><button type="submit" className='submit'>SUBMIT</button></td></tr>
                   </tbody>
                 </table>
               </div>
@@ -492,12 +502,12 @@ export class PlayVideoCopy extends Component {
               this.setState({Feedback});
             }}>
               <div className='feedbackHeader'>
-              <h4>Feedback</h4>
+              <h1>Feedback</h1>
                 </div>
               <table className='feedbackTable'>
                 <tbody>
-                  <tr><td><textarea placeholder="Write something"></textarea></td></tr>
-                  <tr><td colSpan="5"><button type="submit" className='submitFeedback'>Submit</button></td></tr>
+                  <tr><td><textarea placeholder="How was you experience using this interface?"></textarea></td></tr>
+                  <tr><td colSpan="5"><button type="submit" className='submitFeedback'>SUBMIT</button></td></tr>
                   </tbody>
               </table>
             </form>

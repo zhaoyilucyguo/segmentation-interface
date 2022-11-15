@@ -2,7 +2,7 @@
 .SideBar{
     padding-right: 1%;
     padding-left: 1%;
-    padding-top: 3.6%;
+    padding-top: 2.5%;
     width: 30%;
 }
 .PlayVideo{
@@ -15,6 +15,7 @@
 .content {
     display: flex;
     flex-direction: row;
+    font-size: 1.5em;
     /* font-size: 30px; */
 }
 .buttons{
@@ -74,5 +75,3 @@ textarea{
 .submitFeedback{
     float: right;
 }
-
-

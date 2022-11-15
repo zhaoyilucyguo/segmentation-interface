@@ -47,8 +47,8 @@ componentDidMount() {
       document.getElementsByTagName("ul")[0].style.display="block";
     }
   return (
-    <div className='container'>   
-    <h1><NavLink to="/" onClick={navBack}>ARAT Segmentation</NavLink></h1>
+    <div className="container-fluid">   
+    <h1 className="display-1"><NavLink to="/" onClick={navBack}>ARAT Segmentation</NavLink></h1>
     <hr width="100%"></hr>  
     <Routes> 
       <Route path='/' element={null} />
@@ -57,8 +57,7 @@ componentDidMount() {
         .map
         (
             list=>
-            <>
-            <Route path={"/Segmentation"+list.id} element={
+            <Route  key={"PTH"+list.id} path={"/Segmentation"+list.id} element={
             <PlayVideoCopy 
             PTHID={list.id} 
             HANDID={list.handId}
@@ -67,7 +66,6 @@ componentDidMount() {
             IsSubmitted={list.IsSubmitted}
             />
             }/>
-            </>
         )
         }
      </Routes>  
@@ -90,9 +88,9 @@ componentDidMount() {
         .map
         (
             list=>
-            <li>
+            <li key={"PTH"+list.id}>
             <NavLink to={"/Segmentation"+list.id} id={list.id} onClick={navTo}>
-              Segmentation {list.id}: Patient {list.patientId}, Task {list.taskId}, Hand {list.handId} 
+              <h2>Segmentation {list.id}: Patient {list.patientId}, Task {list.taskId}, Hand {list.handId} </h2>
             </NavLink>
             </li>
         )

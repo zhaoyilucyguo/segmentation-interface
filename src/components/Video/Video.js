@@ -26,10 +26,6 @@ export class Video extends Component {
         var fps=30;
         const controls = ['Play', 'Time', 'Progress', 'NextFrame', 'LastFrame', 'FullScreen'];
         
-    
-        function handleDuration(duration) {
-        console.log('Duration: ', duration)
-        }
         return (
             <div>
                 <VideoPlayer
@@ -45,11 +41,8 @@ export class Video extends Component {
                     onProgress={(e)=>{
                       this.handleProgress(e);
                     }}
-                    onDuration={handleDuration}
                     onVideoPlayingComplete={()=>{this.setState({isPlaying: false})}}
                     fps={fps}
-                    // selectedMarker={selectedMarker}
-                    // viewSettings={settings}
                   />
             </div>
         );
