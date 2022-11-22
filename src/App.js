@@ -12,7 +12,8 @@ class App extends Component{
   constructor(props) {
     super(props);
     this.state = {
-      PatientTaskHandMapping: []
+      PatientTaskHandMapping: [],
+      display: "block"
     }
     // this.render=this.render.bind(this);
 }
@@ -21,12 +22,14 @@ componentDidMount() {
     axios.get(`http://localhost:5000/PatientTaskHandMapping`)
     .then(res => {
       const PatientTaskHandMapping =res.data;
-      console.log(PatientTaskHandMapping);
       this.setState({ PatientTaskHandMapping });
     })
 }
 
   render(){
+    var {
+      display
+    } = this.state;
     // const response = fetch("https://localhost:44305/api/Segmentation/GetPatientTaskInformation", {
     //     method: "GET",
     //     mode: "cors",
@@ -48,7 +51,10 @@ componentDidMount() {
     }
   return (
     <div className="container-fluid">   
-    <h1 className="display-1"><NavLink to="/" onClick={navBack}>ARAT Segmentation</NavLink></h1>
+    <h1 className="display-1"><NavLink to="/" onClick={()=>{
+      this.setState({display: "block"})
+      document.getElementsByTagName("ul")[0].style.display="block";
+    }}>ARAT Segmentation</NavLink></h1>
     <hr width="100%"></hr>  
     <Routes> 
       <Route path='/' element={null} />
@@ -61,7 +67,7 @@ componentDidMount() {
             <PlayVideoCopy 
             PTHID={list.id} 
             HANDID={list.handId}
-            PATIENTID={list.patientId}
+            PATIENTID={list['patient']['patientCode']}
             TASKID={list.taskId}
             IsSubmitted={list.IsSubmitted}
             />
@@ -88,9 +94,13 @@ componentDidMount() {
         .map
         (
             list=>
-            <li key={"PTH"+list.id}>
-            <NavLink to={"/Segmentation"+list.id} id={list.id} onClick={navTo}>
-              <h2>Segmentation {list.id}: Patient {list.patientId}, Task {list.taskId}, Hand {list.handId} </h2>
+            <li key={"PTH"+list.id} >
+            <NavLink to={"/Segmentation"+list.id} id={list.id} onClick={()=>{
+              // navTo();
+              this.setState({display: "none"});
+              document.getElementsByTagName("ul")[0].style.display="none";
+            }}>
+              <h2>Segmentation {list.id}: Patient {list['patient']['patientCode']}, Task {list.taskId}, Hand {list.handId} </h2>
             </NavLink>
             </li>
         )

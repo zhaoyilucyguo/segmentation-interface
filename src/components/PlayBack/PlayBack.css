@@ -1,0 +1,15 @@
+.container {
+    position: fixed;
+    top: 10%;
+    left: 20%;
+    height: 65%;
+    width: 1920px;
+    background-color: white;
+    border-style: groove;
+    border-radius: 1%;
+    animation: blinker 1s cubic-bezier(0.5, 0, 1, 1) infinite alternate;
+    font-size: 2em;
+  }
+  #img{
+    padding: 0 5% 5% 5%;
+  }

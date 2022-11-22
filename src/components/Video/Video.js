@@ -25,7 +25,27 @@ export class Video extends Component {
           } = this.state;
         var fps=30;
         const controls = ['Play', 'Time', 'Progress', 'NextFrame', 'LastFrame', 'FullScreen'];
-        
+        document.onkeydown = checkKey;
+
+        function checkKey(e) {
+
+            e = e || window.event;
+
+            if (e.keyCode == '37') {
+              // left arrow
+              document.getElementsByClassName("react-video-player")[0].currentTime = document.getElementsByClassName("react-video-player")[0].currentTime - 1/30;
+              // alert("left");
+            }
+            else if (e.keyCode == '39') {
+              // right arrow
+              if (document.getElementsByClassName("react-video-player")[0].currentTime >= 1/30 ){
+                document.getElementsByClassName("react-video-player")[0].currentTime = document.getElementsByClassName("react-video-player")[0].currentTime + 1/30;
+              }
+                
+              // alert("right");
+            }
+
+        }
         return (
             <div>
                 <VideoPlayer
