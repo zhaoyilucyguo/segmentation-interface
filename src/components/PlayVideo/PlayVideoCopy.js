@@ -20,6 +20,7 @@ export class PlayVideoCopy extends Component {
       PatientTaskHandMappingId: this.props.PTHID,
       TaskId: this.props.TASKID,
       PatientId: this.props.PATIENTID,
+      PatientCode: this.props.PATIENTCODE,
       HandId: this.props.HANDID,
       IsSubmitted: this.props.IsSubmitted,
       segmentId: 1, // start at IPT
@@ -112,7 +113,7 @@ export class PlayVideoCopy extends Component {
               VideoSegment[i]['outColor']="white";
             }
           }
-          VideoSegment[i]['color']="white";
+          VideoSegment[i]['color']="rgb(211, 211, 211)";
           i++;
           
         }
@@ -175,8 +176,10 @@ export class PlayVideoCopy extends Component {
     })
   }
   getTime = (currentTime) => {
+    if (currentTime === undefined) currentTime=0;
     this.setState({currentTime: currentTime});
   }
+  
   getPlay = (showPlayBack) => {
     this.setState({showPlayBack: showPlayBack});
   }
@@ -189,6 +192,7 @@ export class PlayVideoCopy extends Component {
       recommended_view,
       TaskId,
       PatientId,
+      PatientCode,
       HandId,
       PatientTaskHandMapping,
       // definition,
@@ -206,6 +210,20 @@ export class PlayVideoCopy extends Component {
       start,
       end
     } = this.state;
+    // document.addEventListener('DOMContentLoaded', readTime, false);
+    // function readTime(){
+    //   console.log("hello");
+    //   var reactVideo = document.getElementsByClassName("react-video-player")[0];
+    //   if (reactVideo){
+    //     console.log("hello");
+    //     reactVideo.addEventListener('change', (event) => {
+    //       var header = document.getElementById("frame");
+    //       header.innerHTML="Frame " + reactVideo.currentTime;
+    //     });
+    //   }
+    // }
+    
+    
     function changeColor(id1, btn1, id2, btn2) {
       var segment1 = VideoSegment.filter(segment=> segment.segmentId === id1)[0];
       var segment2 = VideoSegment.filter(segment=> segment.segmentId === id2)[0];
@@ -228,6 +246,7 @@ export class PlayVideoCopy extends Component {
         }
       }
     }
+    
     function cancelCheck(id) {
       var check = VideoSegment.filter(segment=> segment.segmentId === id)[0].IsChecked;
       if (check) {
@@ -236,7 +255,7 @@ export class PlayVideoCopy extends Component {
     }
     function IN() {
       cancelCheck(segmentId);
-      var time = currentTime;
+      var time = document.getElementsByClassName("react-video-player")[0].currentTime;
       VideoSegment.filter(view => view.segmentId === segmentId)[0].start=Math.round(time*30);
       if (segmentId === 3) {
         changeColor(segmentId, "IN", segmentId-2, "OUT");
@@ -256,7 +275,7 @@ export class PlayVideoCopy extends Component {
     }
     function OUT() {
       cancelCheck(segmentId);
-      var time = currentTime;
+      var time = document.getElementsByClassName("react-video-player")[0].currentTime;
       console.log(segmentId, VideoSegment.filter(view => view.segmentId === segmentId));
       VideoSegment.filter(view => view.segmentId === segmentId)[0]["end"]=Math.round(time*30);
       if (segmentId === 1) {
@@ -323,15 +342,16 @@ export class PlayVideoCopy extends Component {
     function selectTimestamp(position, id) {
       var time = VideoSegment.filter(segment => segment.segmentId === id)[0][position];
       if (time === "") {
-        alert("Cannot find the frame of the video with an empty timestamp!");
+        // alert("Cannot find the frame of the video with an empty timestamp!");
         return;
       }
       document.getElementsByClassName("react-video-player")[0].currentTime=time/30;
       currentTime = time/30;
     }
     function changeTimestamp(e, position, id) {
-      VideoSegment.filter(segment => segment.segmentId === id)[0][position] = e.target.value;
-      VideoSegment.filter(segment => segment.segmentId === id)[0][position] = e.target.value;
+      cancelCheck(id);
+      VideoSegment.filter(segment => segment.segmentId === id)[0][position] = parseInt(e.target.value);
+      VideoSegment.filter(segment => segment.segmentId === id)[0][position] = parseInt(e.target.value);
       console.log(VideoSegment.filter(segment => segment.segmentId === id)[0][position]);
     }
     function onPlayback(segmentId) {
@@ -355,6 +375,7 @@ export class PlayVideoCopy extends Component {
         segmentHistories.push({
           "id": logsId,
           "patientId": PatientId,
+          // "patientCode": PatientCode,
           "taskId": TaskId,
           "cameraId": cameraId, 
           "handId": HandId,
@@ -375,6 +396,7 @@ export class PlayVideoCopy extends Component {
       segmentHistories.push({
         // "id": logsId,
         "patientId": PatientId,
+        // "patientCode": PatientCode,
         "taskId": TaskId,
         "cameraId": cameraId, 
         "handId": HandId,
@@ -396,6 +418,7 @@ export class PlayVideoCopy extends Component {
       axios.post('http://localhost:5000/Feedback/'+String(feedbackId), {
         "id": feedbackId,
         "patientId": PatientId,
+        // "patientCode": PatientCode,
         "taskId": TaskId,
         "cameraId": cameraId, 
         "handId": HandId,
@@ -445,7 +468,7 @@ export class PlayVideoCopy extends Component {
               videos.filter(video => video.cameraId === this.state.cameraId)
               .map(video=>
                 <div className="video-play" key={video.fileName}>
-                  <h1>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View, Frame {Math.round(currentTime*30)}</h1>
+                  <h1>Patient {PatientCode}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View, Frame {document.getElementsByClassName("react-video-player")[0] ? Math.round(document.getElementsByClassName("react-video-player")[0].currentTime*30) : Math.round(currentTime*30)}</h1>
                   <Video url={"./Videos/"+video.fileName} sendTime={this.getTime}></Video>
                 </div>
               )
@@ -467,6 +490,7 @@ export class PlayVideoCopy extends Component {
                 this.setState({VideoSegment});
 
               }}>OUT</button>
+              
             </div>
             {/* <p>{definition}</p>          */}
           </div>
@@ -491,7 +515,7 @@ export class PlayVideoCopy extends Component {
                   }}>
                     <video src={"./Videos/"+video.fileName} title={"./Videos/"+video.fileName} className="sidebarVideo"  id={video.View}></video>
                     <div>
-                      <h2>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h2>
+                      <h2>Patient {PatientCode}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h2>
                     </div>
                   </div>
                 )

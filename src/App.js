@@ -67,7 +67,8 @@ componentDidMount() {
             <PlayVideoCopy 
             PTHID={list.id} 
             HANDID={list.handId}
-            PATIENTID={list['patient']['patientCode']}
+            PATIENTID={list.patientId}
+            PATIENTCODE={list['patient']['patientCode']}
             TASKID={list.taskId}
             IsSubmitted={list.IsSubmitted}
             />

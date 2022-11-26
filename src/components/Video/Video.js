@@ -9,19 +9,24 @@ export class Video extends Component {
         url: this.props.url,
         isPlaying: this.props.isPlaying,
         timeStart: this.props.timeStart,
-        currentTime: undefined
+        currentTime: undefined,
+        duration: undefined
       };
     }
     handleProgress = (e) => {
       this.setState({currentTime: e.target.currentTime});
       this.props.sendTime(this.state.currentTime);
     } 
-    
+    handleDuration = (duration) => {
+      this.setState({duration: duration});
+    }
     render() { 
         var { 
             url, 
             isPlaying,
-            timeStart
+            timeStart,
+            duration,
+            currentTime
           } = this.state;
         var fps=30;
         const controls = ['Play', 'Time', 'Progress', 'NextFrame', 'LastFrame', 'FullScreen'];
@@ -34,12 +39,20 @@ export class Video extends Component {
             if (e.keyCode == '37') {
               // left arrow
               document.getElementsByClassName("react-video-player")[0].currentTime = document.getElementsByClassName("react-video-player")[0].currentTime - 1/30;
+              // document.getElementsByClassName("react-video-player")[0].currentTime = Math.min(
+              //   duration,
+              //   currentTime - 1/30,
+              // )
               // alert("left");
             }
             else if (e.keyCode == '39') {
               // right arrow
               if (document.getElementsByClassName("react-video-player")[0].currentTime >= 1/30 ){
                 document.getElementsByClassName("react-video-player")[0].currentTime = document.getElementsByClassName("react-video-player")[0].currentTime + 1/30;
+                // document.getElementsByClassName("react-video-player")[0].currentTime = Math.min(
+                //   duration,
+                //   currentTime + 1/30,
+                // )
               }
                 
               // alert("right");
@@ -61,6 +74,7 @@ export class Video extends Component {
                     onProgress={(e)=>{
                       this.handleProgress(e);
                     }}
+                    onDuration={(duration)=>{this.handleDuration(duration)}}
                     onVideoPlayingComplete={()=>{this.setState({isPlaying: false})}}
                     fps={fps}
                   />

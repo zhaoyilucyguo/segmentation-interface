@@ -2,7 +2,7 @@
 .SideBar{
     padding-right: 1%;
     padding-left: 1%;
-    padding-top: 2.5%;
+    padding-top: 2%;
     width: 30%;
 }
 .PlayVideo{
@@ -15,8 +15,7 @@
 .content {
     display: flex;
     flex-direction: row;
-    font-size: 1.5em;
-    /* font-size: 30px; */
+    font-size: 2em;
 }
 .buttons{
     display: flex;
@@ -35,11 +34,6 @@
 input {
     width: 100%;
 }
-.plus,
-.plusT,
-.plusF {
-    display: none;
-}
 /* .TimeStamp {
     padding-top: 3%;
 } */
@@ -49,10 +43,12 @@ input {
 }
 .video-preview{
     display: flex;
+    padding-top: 4%;
 }
 .SwitchView,
 .TimeStamp,
 .Feedback {
+    padding: 0% 4% 4% 4%;
     border-style: groove;
     border-radius: 1%;
 }

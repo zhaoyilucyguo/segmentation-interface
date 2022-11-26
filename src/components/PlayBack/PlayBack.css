@@ -2,7 +2,7 @@
     position: fixed;
     top: 10%;
     left: 20%;
-    height: 65%;
+    height: 50%;
     width: 1920px;
     background-color: white;
     border-style: groove;
@@ -12,4 +12,11 @@
   }
   #img{
     padding: 0 5% 5% 5%;
+  }
+  .button{
+    margin: 0;
+    position: absolute;
+    left: 50%;
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
   }
