@@ -392,9 +392,9 @@ export class PlayVideoCopy extends Component {
       }
     }
     function switchView(cameraId){
-      // var logsId = GetSegment.length+1;
+      var logsId = segmentHistories.length+1;
       segmentHistories.push({
-        // "id": logsId,
+        "id": logsId,
         "patientId": PatientId,
         // "patientCode": PatientCode,
         "taskId": TaskId,
@@ -403,7 +403,7 @@ export class PlayVideoCopy extends Component {
         "segmentId": segmentId,
         "start": VideoSegment.filter(view => view.segmentId === segmentId)[0].start,
         "end": VideoSegment.filter(view => view.segmentId === segmentId)[0].end,
-        "isSubmitted": 0
+        "isSubmitted": false
       })
       view = Camera.filter(view => view.id === cameraId)[0].ViewType;
     }

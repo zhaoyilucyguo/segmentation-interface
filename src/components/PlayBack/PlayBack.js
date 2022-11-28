@@ -21,6 +21,11 @@ export class PlayBack extends Component {
     
     closePlayback = () => {
         this.setState({showPlayBack: false});
+        this.setState({activeImageIndex: 0});
+        this.setState({bars: []});
+        this.setState({frames: []});
+        this.setState({test: 1});
+        this.setState({notCalled: true});
         this.props.sendPlay(this.state.showPlayBack);
       }
       getVideoImage = (path, secs, callback) =>{
