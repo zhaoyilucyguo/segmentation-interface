@@ -23,7 +23,34 @@ componentDidMount() {
     .then(res => {
       const PatientTaskHandMapping =res.data;
       this.setState({ PatientTaskHandMapping });
+      console.log(PatientTaskHandMapping.filter(list => list.isSubmitted === true));
     })
+    // axios.get('http://localhost:5016/api/Segmentation/GetPatientTaskInformation', {
+    //   "Access-Control-Allow-Origin": "http://localhost:3000/"  
+    // })
+    // .then(res => {
+    //     console.log(res.data)
+    //     var PatientTaskHandMapping =res.data;
+    //     this.setState({ PatientTaskHandMapping });
+    // })
+    // let url = 'http://localhost:5016/api/Segmentation/GetPatientTaskInformation';
+    // let headers = new Headers();
+
+    // headers.append('Content-Type', 'application/json');
+    // headers.append('Accept', 'application/json');
+    // // headers.append('Authorization', 'Basic ' + base64.encode(username + ":" +  password));
+    // headers.append('Origin','http://localhost:3000');
+    // fetch(url, {
+    //   method: "GET",
+    //   mode: 'cors',
+    //   headers: headers
+    // })
+    // .then(res => res.json())
+    // .then(out =>
+    //   console.log('Checkout this JSON! ', out))
+    // .catch(err => { throw err });
+   
+ 
 }
 
   render(){
@@ -77,21 +104,25 @@ componentDidMount() {
         }
      </Routes>  
      <ul>
-     {/* {
-        this.state.PatientTaskHandMapping.filter(list => list.IsSubmitted === 1)
+     {
+        this.state.PatientTaskHandMapping.filter(list => list.isSubmitted === true)
         .map
         (
             list=>
-            <li>
-            <NavLink to={"/Segmentation"+list.id} id={list.id} onClick={navTo}>
-              Segmentation {list.id}: Patient {list.PatientId}, Task {list.TaskId}, Hand {list.HandId} 
-              <AiOutlineCheck size={30} color="green"/>
+            <li key={"PTH"+list.id} >
+            <NavLink to={"/Segmentation"+list.id} id={list.id} onClick={()=>{
+              // navTo();
+              this.setState({display: "none"});
+              document.getElementsByTagName("ul")[0].style.display="none";
+            }}>
+              <h2>Segmentation {list.id}: Patient {list['patient']['patientCode']}, Task {list.taskId}, Hand {list.handId} <AiOutlineCheck size={30} color="green"/></h2>
+              
             </NavLink>
             </li>
         )
-      }  */}
+      } 
       {
-        this.state.PatientTaskHandMapping//.filter(list => list.IsSubmitted === 0)
+        this.state.PatientTaskHandMapping.filter(list => list.isSubmitted === false)
         .map
         (
             list=>

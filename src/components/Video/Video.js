@@ -39,23 +39,21 @@ export class Video extends Component {
             if (e.keyCode == '37') {
               // left arrow
               document.getElementsByClassName("react-video-player")[0].currentTime = document.getElementsByClassName("react-video-player")[0].currentTime - 1/30;
-              // document.getElementsByClassName("react-video-player")[0].currentTime = Math.min(
-              //   duration,
-              //   currentTime - 1/30,
-              // )
-              // alert("left");
             }
             else if (e.keyCode == '39') {
               // right arrow
               if (document.getElementsByClassName("react-video-player")[0].currentTime >= 1/30 ){
                 document.getElementsByClassName("react-video-player")[0].currentTime = document.getElementsByClassName("react-video-player")[0].currentTime + 1/30;
-                // document.getElementsByClassName("react-video-player")[0].currentTime = Math.min(
-                //   duration,
-                //   currentTime + 1/30,
-                // )
               }
                 
-              // alert("right");
+            }
+            else if (e.keyCode == '32'){
+              if (document.getElementsByClassName("react-video-player")[0].isPlaying){
+                document.getElementsByClassName("react-video-player")[0].isPlaying = false;
+              }
+              else{
+                document.getElementsByClassName("react-video-player")[0].isPlaying = true;
+              }
             }
 
         }
