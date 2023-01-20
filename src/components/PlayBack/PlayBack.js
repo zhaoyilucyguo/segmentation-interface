@@ -60,6 +60,11 @@ export class PlayBack extends Component {
           if (event.type === 'seeked') {
               this.state.bars.push(img);
               this.state.frames.push(frame);
+              if (document.getElementById("img")) {
+            
+                document.getElementById("img").innerHTML="Still Loading... Frame: " + frame;
+                document.getElementById("img").appendChild(img);
+              }
               if (this.state.endFrame >= ++frame) {
                 // this.setState({this.state.bars});
                 this.showImageAt(frame);
@@ -125,7 +130,6 @@ export class PlayBack extends Component {
                 <div className="d-flex flex-row-reverse" onClick={this.closePlayback}><AiOutlineClose/></div>
                
                 <div id="img">
-                  Still loading...
                 </div> 
                 <div>
                   <button 
