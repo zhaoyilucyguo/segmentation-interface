@@ -35,7 +35,13 @@ export class PlayVideoCopy extends Component {
       Update: 0,
       showPlayBack: false,
       start: undefined,
-      end: undefined      
+      end: undefined,
+      bars: [],
+      activeImageIndex: 0,
+      frames: [],
+      test: 1,
+      notCalled: true,
+      loaded: false,      
     }
 
     // this.render=this.render.bind(this);
@@ -213,9 +219,24 @@ export class PlayVideoCopy extends Component {
       instruction,
       showPlayBack,
       start,
-      end
+      end,
+      bars,
+      activeImageIndex,
+      frames,
+      test,
+      notCalled,
+      loaded,
     } = this.state;
-    
+    const values={
+      start,
+      end,
+      bars,
+      activeImageIndex,
+      frames,
+      test,
+      notCalled,
+      loaded,
+    }
     
     function changeColor(id1, btn1, id2, btn2) {
       var segment1 = VideoSegment.filter(segment=> segment.segmentId === id1)[0];
@@ -547,8 +568,31 @@ export class PlayVideoCopy extends Component {
               
             </div>
             {/* <p>{definition}</p>          */}
+            {/* url: "./Videos/"+this.props.url,
+        showPlayBack: this.props.showPlayBack,
+        startFrame: this.props.startFrame,
+        endFrame: this.props.endFrame,
+        bars: [],
+        activeImageIndex: 0,
+        frames: [],
+        test: 1,
+        notCalled: true,
+        loaded: false, */}
           </div>
-          { showPlayBack ? <PlayBack url={videos.filter(video => video.cameraId === this.state.cameraId)[0].fileName} startFrame={start} endFrame={end} sendPlay={this.getPlay}/>: null}
+          { showPlayBack ? 
+          <PlayBack 
+          url={videos.filter(video => video.cameraId === this.state.cameraId)[0].fileName} 
+          sendPlay={this.getPlay}
+          values={values}
+          // startFrame={start} 
+          // endFrame={end} 
+          // bars={[]}
+          // activeImageIndex={0}
+          // frames={[]}
+          // test={1}
+          // notCalled={true}
+          // loaded={false}
+          />: null}
           <div className='SideBar' key='SideBar'>
             <div className='SwitchView'>
               <div className='viewHeader'>

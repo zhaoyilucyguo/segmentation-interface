@@ -9,25 +9,38 @@ export class PlayBack extends Component {
       this.state = {
         url: "./Videos/"+this.props.url,
         showPlayBack: this.props.showPlayBack,
-        startFrame: this.props.startFrame,
-        endFrame: this.props.endFrame,
-        bars: [],
-        activeImageIndex: 0,
-        frames: [],
-        test: 1,
-        notCalled: true
+        // startFrame: this.props.startFrame,
+        // endFrame: this.props.endFrame,
+        // bars: this.props.bars,
+        // activeImageIndex: this.props.activeImageIndex,
+        // frames: this.props.frames,
+        // test: this.props.test,
+        // notCalled: this.props.notCalled,
+        // loaded: this.props.loaded,
+        startFrame: this.props.values.start,
+        endFrame: this.props.values.end,
+        bars: this.props.values.bars,
+        activeImageIndex: this.props.values.activeImageIndex,
+        frames: this.props.values.frames,
+        test: this.props.values.test,
+        notCalled: this.props.values.notCalled,
+        loaded: this.props.values.loaded,
       };
     }
-    
+    reset = () => {
+      this.setState({activeImageIndex: 0});
+      this.setState({bars: []});
+      this.setState({frames: []});
+      this.setState({test: 1});
+      this.setState({notCalled: true});
+      this.setState({loaded: false});
+      this.props.sendPlay(this.state.showPlayBack);
+    }
     closePlayback = () => {
         this.setState({showPlayBack: false});
-        this.setState({activeImageIndex: 0});
-        this.setState({bars: []});
-        this.setState({frames: []});
-        this.setState({test: 1});
-        this.setState({notCalled: true});
-        this.props.sendPlay(this.state.showPlayBack);
+        this.reset();
       }
+
       getVideoImage = (path, secs, callback) =>{
         var me = this, video = document.createElement('video');
         video.onloadedmetadata = function() {
@@ -61,15 +74,15 @@ export class PlayBack extends Component {
               this.state.bars.push(img);
               this.state.frames.push(frame);
               if (document.getElementById("img")) {
-            
                 document.getElementById("img").innerHTML="Still Loading... Frame: " + frame;
                 document.getElementById("img").appendChild(img);
               }
               if (this.state.endFrame >= ++frame) {
-                // this.setState({this.state.bars});
+                console.log(this.state.endFrame, frame);
                 this.showImageAt(frame);
               }
               else {
+                console.log("exit")
                 return;
               }
           }
@@ -81,26 +94,36 @@ export class PlayBack extends Component {
       if (document.getElementById("btn")) {
         document.getElementById("btn").style.display="none";
       }
+      // enter component did mount for the first time
       if (this.state.notCalled){
-        this.showImageAt(this.state.startFrame);
+        // loading image
+        var frame = this.state.startFrame;
+        this.showImageAt(frame);
+        // set it to prevent reloading of the images
         this.setState({notCalled: false});
       }
-      console.log(this.state.bars.length, this.state.activeImageIndex);
+      var interval = undefined;
+      var wait = undefined;
+      // if all the images are loaded
+      console.log(this.state.bars.length, this.state.endFrame, this.state.startFrame+1)
       if (this.state.bars.length === this.state.endFrame - this.state.startFrame+1){
-        const interval = setInterval(()=>{
+        // set a new interval to show the images at the rate of 50 micro sec per image
+        interval = setInterval(()=>{
+          // if all images are displayed, show the replay button
           if (this.state.activeImageIndex+1===this.state.bars.length){
             // this.setState({activeImageIndex: 0});
             if (document.getElementById("btn")) {
               document.getElementById("btn").style.display="block";
             }
+            // exit component did mount
             clearInterval(interval);
           }
+          // show the image and the frame 
           if (document.getElementById("img")) {
-            
             document.getElementById("img").innerHTML="Frame: " + this.state.frames[this.state.activeImageIndex];
             document.getElementById("img").appendChild(this.state.bars[this.state.activeImageIndex]);
           }
-          
+          // update the index of the image and the frame in their arrays
           let newActiveIndex = this.state.activeImageIndex+1     
           this.setState({
             activeImageIndex: newActiveIndex
@@ -108,27 +131,50 @@ export class PlayBack extends Component {
         }, 50);
       }
       else {
-        console.log("else");
-        const interval1 = setInterval(()=>{
+        // if we haven't finished loading all images, we wait 
+        
+        wait = setInterval(()=>{
+          console.log("wait");
+          // exit wait and show images
           if (this.state.bars.length === this.state.endFrame - this.state.startFrame + 1) {
-            this.componentDidMount();
-            clearInterval(interval1);
+            
+            if (this.state.loaded === false) {
+              this.setState({loaded: true});
+              this.setState({activeImageIndex: 0});
+              this.componentDidMount();
+              clearInterval(wait);
+            }
+            else {
+              clearInterval(wait);
+            }
           }
-          let test = this.state.test;
-          this.setState({
-            test: test+1
-          })
+          else if (this.state.bars.length > this.state.endFrame - this.state.startFrame + 1){
+            clearInterval(wait);
+          }
+          else if (this.state.loaded) {
+            clearInterval(wait);
+          }
+          else if (this.state.showPlayBack === false) {
+            this.closePlayback();
+            clearInterval(wait);
+          }
+          // continue wait
+          else{
+            console.log("continue wait", this.state.loaded, this.state.endFrame, this.state.startFrame, this.state.bars.length);
+            let test = this.state.test;
+            this.setState({
+              test: test+1
+            })
+          }
+            
         }, 2000);
       }
-       
-   
     }
    
     render() { 
         return (
             <div className='container'>
                 <div className="d-flex flex-row-reverse" onClick={this.closePlayback}><AiOutlineClose/></div>
-               
                 <div id="img">
                 </div> 
                 <div>

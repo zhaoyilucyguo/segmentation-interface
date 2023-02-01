@@ -92,7 +92,7 @@ componentDidMount() {
               this.setState({display: "none"});
               document.getElementsByTagName("ul")[0].style.display="none";
             }}>
-              <h2>Patient {list['patient']['patientCode']}, Task {list.taskId}, Hand {list.handId} <AiOutlineCheck size={30} color="green"/></h2>
+              <h2>Segmentation {list.id}: Patient {list['patient']['patientCode']}, Task {list.taskId}, Hand {list.handId} <AiOutlineCheck size={30} color="green"/></h2>
               
             </NavLink>
             </li>
