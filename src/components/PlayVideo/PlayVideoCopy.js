@@ -8,6 +8,7 @@ import { PlayBack } from '../PlayBack/PlayBack';
 export class PlayVideoCopy extends Component {
   constructor(props) {
     super(props);
+    this.child = React.createRef();
     this.state = {
       VideoSegment: [],
       segmentHistories: [],
@@ -186,6 +187,8 @@ export class PlayVideoCopy extends Component {
   }
   
   getPlay = (showPlayBack) => {
+    console.log("reset playback");
+    this.child.current.closePlayback();
     this.setState({showPlayBack: showPlayBack});
   }
   render() {
@@ -398,8 +401,6 @@ export class PlayVideoCopy extends Component {
     function onCheck(id, start, end) {
       var segment = VideoSegment.filter(segment => segment.segmentId === id)[0];
       var checkBox = document.getElementById("CHECK"+id);
-      console.log(VideoSegment.filter(segment => segment.segmentId === id)[0].cameraId);
-      console.log(cameraId);
       if (segment.start === "" || segment.end === "") {
         checkBox.checked=false;
         alert("Make sure you have filled out the segment entries before you check them");
@@ -508,7 +509,6 @@ export class PlayVideoCopy extends Component {
         j++;
         
       }
-
       let model = { 'submittedSegments' : submittedSegments, 'segmentHistories': segmentHistories}
       await axios.post('http://localhost:5000/VideoSegment/', model);
       await window.location.reload(false); 
@@ -529,6 +529,7 @@ export class PlayVideoCopy extends Component {
             }
             <div className='buttons'>
               <button id="in" onClick={()=>{
+                // this.child.current.closePlayback();
                 this.setState({showPlayBack: false});
                 IN();
                 this.setState({VideoSegment});
@@ -539,6 +540,7 @@ export class PlayVideoCopy extends Component {
                 </h2>
               </div>
               <button id="out" onClick={()=>{
+                // this.child.current.closePlayback();
                 this.setState({showPlayBack: false});
                 OUT();
                 this.setState({VideoSegment});
@@ -548,7 +550,7 @@ export class PlayVideoCopy extends Component {
             </div>
             {/* <p>{definition}</p>          */}
           </div>
-          { showPlayBack ? <PlayBack url={videos.filter(video => video.cameraId === this.state.cameraId)[0].fileName} startFrame={start} endFrame={end} sendPlay={this.getPlay}/>: null}
+          { showPlayBack ? <PlayBack url={videos.filter(video => video.cameraId === this.state.cameraId)[0].fileName} startFrame={start} endFrame={end} sendPlay={this.getPlay} ref={this.child}/>: null}
           <div className='SideBar' key='SideBar'>
             <div className='SwitchView'>
               <div className='viewHeader'>
@@ -560,6 +562,7 @@ export class PlayVideoCopy extends Component {
                 videos.filter(video => video.cameraId !== this.state.cameraId)
                 .map(video=>
                   <div className="video-preview"  key={video.fileName} onClick={() => {
+                    // this.child.current.closePlayback();
                     this.setState({showPlayBack: false});
                     switchView(video.cameraId);
                     this.setState({cameraId: video.cameraId});
@@ -579,6 +582,7 @@ export class PlayVideoCopy extends Component {
             </div>
             <div className='timestamp'>
             <form className='TimeStamp' onSubmit={((e)=>{
+              // this.child.current.closePlayback();
               this.setState({showPlayBack: false});
               submit(e);
               // this.setState({segmentHistories});
@@ -606,6 +610,7 @@ export class PlayVideoCopy extends Component {
                         <tr  id={"ROW"+segment.segmentId}  key={segment.segmentId} style={{"backgroundColor": segment.color}}>
                           <td  id={segment.segmentId}
                           onClick={() => {
+                            // this.child.current.closePlayback();
                             this.setState({showPlayBack: false});
                             onSelect(segment.segmentId);
                             this.setState({cameraId});
@@ -624,6 +629,7 @@ export class PlayVideoCopy extends Component {
                             this.setState({VideoSegment});
                           })}
                           onClick={(() => {
+                            // this.child.current.closePlayback();
                             this.setState({showPlayBack: false});
                             selectTimestamp("start", segment.segmentId);
                             this.setState({currentTime});
@@ -636,11 +642,13 @@ export class PlayVideoCopy extends Component {
                             this.setState({VideoSegment});
                           })}
                           onClick={(() => {
+                            // this.child.current.closePlayback();
                             this.setState({showPlayBack: false});
                             selectTimestamp("end", segment.segmentId);
                             this.setState({currentTime});
                           })} style={{"backgroundColor": segment.outColor}}></input></td>
                           <td><input className="check" type="checkbox" onChange={(() => {
+                            // this.child.current.closePlayback();
                             this.setState({showPlayBack: false});
                             onCheck(segment.segmentId, segment.start, segment.end);
                             this.setState({segmentHistories});
@@ -648,7 +656,10 @@ export class PlayVideoCopy extends Component {
                           })} id={"CHECK"+String(segment.segmentId)} checked={segment.IsChecked}/></td>
                           <td><div onClick={
                             () => {
-                              if (showPlayBack) this.setState({showPlayBack: false});
+                              if (showPlayBack) {
+                                // this.child.current.closePlayback();
+                                this.setState({showPlayBack: false});
+                              }
                               else {
                                 onPlayback(segment.segmentId);
                                 this.setState({start});
@@ -670,6 +681,7 @@ export class PlayVideoCopy extends Component {
             </div>
             <div className='feedback'>
             <form className='Feedback' onSubmit={(e)=>{
+              // this.child.current.closePlayback();
               this.setState({showPlayBack: false});
               submitFeedback(e);
               this.setState({Feedback});
