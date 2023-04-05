@@ -48,50 +48,21 @@ export class PlayVideoCopy extends Component {
 
   }
   checkColor(VideoSegment){
-    let i = 0;
-        while ( i < VideoSegment.length) {
-          VideoSegment[i]['IsChecked']=true;
-          VideoSegment[i]['cameraId']=undefined;
-          if (VideoSegment[i].segmentId === 2) {
-            var out1 = VideoSegment[i-1].end;
-            var out2 = VideoSegment[i].end;
-            if (Math.abs(out1 - out2) > 2) {
-              VideoSegment[i-1]['outColor']="yellow";
-              VideoSegment[i]['outColor']="yellow";
-            }
-            else {
-              VideoSegment[i]['inColor']="white";
-              VideoSegment[i]['outColor']="white";
-            }
-          }
-          else if (VideoSegment[i].segmentId === 3) {
-            out1 = VideoSegment[i-2].end;
-            out2 = VideoSegment[i].start;
-            if (Math.abs(out1 - out2) > 2) {
-              VideoSegment[i-2]['outColor']="yellow";
-              VideoSegment[i]['inColor']="yellow";
-            }
-            else {
-              VideoSegment[i]['inColor']="white";
-              VideoSegment[i]['outColor']="white";
-            }
-          }
-          else if (i > 0) {
-            out1 = VideoSegment[i-1].end;
-            out2 = VideoSegment[i].start;
-            if (Math.abs(out1 - out2) > 2) {
-              VideoSegment[i-1]['outColor']="yellow";
-              VideoSegment[i]['inColor']="yellow";
-            }
-            else {
-              VideoSegment[i]['inColor']="white";
-              VideoSegment[i]['outColor']="white";
-            }
-          }
-          VideoSegment[i]['color']="rgb(211, 211, 211)";
-          i++;
-          
-        }
+    let i = 1;
+    while ( i < VideoSegment.length) {
+      let out1 = VideoSegment[i-1].end;
+      let out2 = VideoSegment[i].start;
+      if (Math.abs(out1 - out2) > 2) {
+        VideoSegment[i-1]['outColor']="yellow";
+        VideoSegment[i]['inColor']="yellow";
+      }
+      else {
+        VideoSegment[i]['inColor']="white";
+        VideoSegment[i]['outColor']="white";
+      }
+      VideoSegment[i]['color']="rgb(211, 211, 211)";
+      i++;
+    }
   }
   async componentDidMount() {
     if (this.state.HandId === 1) {
@@ -180,7 +151,7 @@ export class PlayVideoCopy extends Component {
         this.setState({ VideoSegment });
       }
     })
-    await axios.get(`http://localhost:5000/Feedback`)
+    await axios.get(`http://localhost:5000/SegmentFeedback`)
       .then(res => {
         const Feedback =res.data;
         this.setState({ Feedback });
@@ -228,6 +199,7 @@ export class PlayVideoCopy extends Component {
       loaded,
     } = this.state;
     const values={
+      showPlayBack,
       start,
       end,
       bars,
@@ -272,56 +244,42 @@ export class PlayVideoCopy extends Component {
       var time = document.getElementsByClassName("react-video-player")[0].currentTime;
       VideoSegment.filter(view => view.segmentId === segmentId)[0].start=Math.round(time*30);
       VideoSegment.filter(view => view.segmentId === segmentId)[0].cameraId = cameraId;
-      if (segmentId === 3) {
-        changeColor(segmentId, "IN", segmentId-2, "OUT");
+      
+      if (VideoSegment.length > 4) {
+        if (segmentId === 6) changeColor(segmentId, "IN", 3, "OUT");
+        else if (segmentId === 5) changeColor(segmentId, "IN", 6, "OUT");
+        else if (segmentId === 4) changeColor(segmentId, "IN", 5, "OUT");
       }
-      if (segmentId > 3) {
-        if (VideoSegment.length > 4) {
-          if (segmentId === 6) changeColor(segmentId, "IN", 3, "OUT");
-          else if (segmentId === 5) changeColor(segmentId, "IN", 6, "OUT");
-          else if (segmentId === 4) changeColor(segmentId, "IN", 5, "OUT");
-        }
-        else if (VideoSegment.length < 4) {
-          if (segmentId === 6) changeColor(segmentId, "IN", 8, "OUT");
-          else if (segmentId === 8) changeColor(segmentId, "IN", segmentId-1, "OUT");
-        }
-        else changeColor(segmentId, "IN", segmentId-1, "OUT");
+      else if (VideoSegment.length < 4) {
+        if (segmentId === 9) changeColor(segmentId, "IN", 7, "OUT");
       }
+      else {
+        if (segmentId !== 1) changeColor(segmentId, "IN", segmentId-1, "OUT");
+      }
+      
     }
     function OUT() {
       cancelCheck(segmentId);
       var time = document.getElementsByClassName("react-video-player")[0].currentTime;
       VideoSegment.filter(view => view.segmentId === segmentId)[0]["end"]=Math.round(time*30);
       VideoSegment.filter(view => view.segmentId === segmentId)[0].cameraId = cameraId;
-      if (segmentId === 1) {
-        changeColor(segmentId, "OUT", segmentId+1, "OUT");
-        changeColor(segmentId, "OUT", segmentId+2, "IN");
+      
+      if (VideoSegment.length > 4) {
+        if (segmentId === 3) changeColor(segmentId, "OUT", 6, "IN");
+        else if (segmentId === 6) changeColor(segmentId, "OUT", 5, "IN");
+        else if (segmentId === 5) changeColor(segmentId, "OUT", 4, "IN");
       }
-      else if (segmentId === 2) {
-        changeColor(segmentId, "OUT", segmentId-1, "OUT");
+      else if (VideoSegment.length < 4) {
+        if (segmentId === 7) changeColor(segmentId, "OUT", 9, "IN");
       }
-      else if (segmentId> 1) {
-        if (VideoSegment.length > 4) {
-          if (segmentId === 3) changeColor(segmentId, "OUT", 6, "IN");
-          else if (segmentId === 6) changeColor(segmentId, "OUT", 5, "IN");
-          else if (segmentId === 5) changeColor(segmentId, "OUT", 4, "IN");
-        }
-        else if (VideoSegment.length < 4) {
-          if (segmentId === 8) changeColor(segmentId, "OUT", 6, "IN");
-          else if (segmentId === 7) changeColor(segmentId, "OUT", 8, "IN");
-        }
-        else {
-          if (segmentId < VideoSegment.length-1) changeColor(segmentId, "OUT", segmentId+1, "IN");
-        }
+      else {
+        if (segmentId !== 4) changeColor(segmentId, "OUT", segmentId+1, "IN");
       }
     }
     function onSelect(id) {
       if (id > 1 && id !== 7){
         var check = undefined;
-        if (id === 6) {
-          if (VideoSegment.length < 4) check=8;
-          else check=3;
-        }
+        if (id === 6) check=3;
         else if (id === 5) check=6;
         else if (id === 4) {
           if (VideoSegment.length > 4) check=5;
@@ -371,44 +329,30 @@ export class PlayVideoCopy extends Component {
       // VideoSegment.filter(segment => segment.segmentId === id)[0][position] = parseInt(e.target.value);
       if (position === "start"){
         console.log("Start");
-        if (id === 1) {
-          changeColor(id, "OUT", id+1, "OUT");
-          changeColor(id, "OUT", id+2, "IN");
+        if (id.length > 4) {
+          if (id === 3) changeColor(id, "OUT", 6, "IN");
+          else if (id === 6) changeColor(id, "OUT", 5, "IN");
+          else if (id === 5) changeColor(id, "OUT", 4, "IN");
         }
-        else if (id === 2) {
-          changeColor(id, "OUT", id-1, "OUT");
+        else if (VideoSegment.length < 4) {
+          if (id === 7) changeColor(id, "OUT", 9, "IN");
         }
-        else if (id> 1) {
-          if (id.length > 4) {
-            if (id === 3) changeColor(id, "OUT", 6, "IN");
-            else if (id === 6) changeColor(id, "OUT", 5, "IN");
-            else if (id === 5) changeColor(id, "OUT", 4, "IN");
-          }
-          else if (VideoSegment.length < 4) {
-            if (id === 8) changeColor(id, "OUT", 6, "IN");
-            else if (id === 7) changeColor(id, "OUT", 8, "IN");
-          }
-          else {
-            if (id < VideoSegment.length-1) changeColor(id, "OUT", id+1, "IN");
-          }
+        else {
+          if (id !== 4) changeColor(id, "OUT", id+1, "IN");
         }
       }
       else {
         console.log("end");
-        if (id === 3) {
-          changeColor(id, "IN", id-2, "OUT");
+        if (VideoSegment.length > 4) {
+          if (id === 6) changeColor(id, "IN", 3, "OUT");
+          else if (id === 5) changeColor(id, "IN", 6, "OUT");
+          else if (id === 4) changeColor(id, "IN", 5, "OUT");
         }
-        if (id > 3) {
-          if (VideoSegment.length > 4) {
-            if (id === 6) changeColor(id, "IN", 3, "OUT");
-            else if (id === 5) changeColor(id, "IN", 6, "OUT");
-            else if (id === 4) changeColor(id, "IN", 5, "OUT");
-          }
-          else if (VideoSegment.length < 4) {
-            if (id === 6) changeColor(id, "IN", 8, "OUT");
-            else if (id === 8) changeColor(id, "IN", id-1, "OUT");
-          }
-          else changeColor(id, "IN", id-1, "OUT");
+        else if (VideoSegment.length < 4) {
+          if (id === 9) changeColor(id, "IN", 7, "OUT");
+        }
+        else {
+          if (id !== 1) changeColor(id, "IN", id-1, "OUT");
         }
       }
     }
@@ -443,7 +387,8 @@ export class PlayVideoCopy extends Component {
           "start": start==='' ? 0 : start,
           "end": end === '' ? 0: end,
           "createdAt": new Date(),
-          "isSubmitted": false
+          "isSubmitted": false,
+          "Reason": document.getElementById("segmentor").value
         })
       } else {
         if (segment.color === "rgb(211, 211, 211)") {
@@ -451,6 +396,15 @@ export class PlayVideoCopy extends Component {
         }
         VideoSegment.filter(segment => segment.segmentId === id)[0].IsChecked=false;
       }
+    }
+    function updateSegmentor(){
+      var segmentor = document.getElementById("segmentor").value;
+      segmentHistories.forEach(
+        function (history) {
+          history["Reason"] = segmentor;
+        }
+      )
+
     }
     function switchView(id){
       console.log(id);
@@ -466,7 +420,8 @@ export class PlayVideoCopy extends Component {
         "start": VideoSegment.filter(view => view.segmentId === segmentId)[0].start === ''? 0: VideoSegment.filter(view => view.segmentId === segmentId)[0].start,
         "end": VideoSegment.filter(view => view.segmentId === segmentId)[0].end === '' ? 0: VideoSegment.filter(view => view.segmentId === segmentId)[0].end,
         "createdAt": new Date(),
-        "isSubmitted": false
+        "isSubmitted": false,
+        "Reason": document.getElementById("segmentor").value
       })
       segmentHistories.push({
         "id": logsId,
@@ -479,7 +434,8 @@ export class PlayVideoCopy extends Component {
         "start": VideoSegment.filter(view => view.segmentId === segmentId)[0].start === ''? 0: VideoSegment.filter(view => view.segmentId === segmentId)[0].start,
         "end": VideoSegment.filter(view => view.segmentId === segmentId)[0].end === '' ? 0: VideoSegment.filter(view => view.segmentId === segmentId)[0].end,
         "createdAt": new Date(),
-        "isSubmitted": false
+        "isSubmitted": false,
+        "Reason": document.getElementById("segmentor").value
       })
       view = Camera.filter(view => view.id === id)[0].ViewType;
       VideoSegment.filter(view => view.segmentId === segmentId)[0].cameraId = id;
@@ -492,7 +448,7 @@ export class PlayVideoCopy extends Component {
         return;
       }
       var feedbackId = Feedback.length+1;
-      axios.post('http://localhost:5000/Feedback/'+String(feedbackId), {
+      axios.post('http://localhost:5000/SegmentFeedback/'+String(feedbackId), {
         "id": feedbackId,
         "patientId": PatientId,
         // "patientCode": PatientCode,
@@ -550,7 +506,7 @@ export class PlayVideoCopy extends Component {
             }
             <div className='buttons'>
               <button id="in" onClick={()=>{
-                this.setState({showPlayBack: false});
+                // this.setState({showPlayBack: false});
                 IN();
                 this.setState({VideoSegment});
               }}>IN</button>
@@ -560,38 +516,19 @@ export class PlayVideoCopy extends Component {
                 </h2>
               </div>
               <button id="out" onClick={()=>{
-                this.setState({showPlayBack: false});
+                // this.setState({showPlayBack: false});
                 OUT();
                 this.setState({VideoSegment});
 
               }}>OUT</button>
               
             </div>
-            {/* <p>{definition}</p>          */}
-            {/* url: "./Videos/"+this.props.url,
-        showPlayBack: this.props.showPlayBack,
-        startFrame: this.props.startFrame,
-        endFrame: this.props.endFrame,
-        bars: [],
-        activeImageIndex: 0,
-        frames: [],
-        test: 1,
-        notCalled: true,
-        loaded: false, */}
           </div>
           { showPlayBack ? 
           <PlayBack 
           url={videos.filter(video => video.cameraId === this.state.cameraId)[0].fileName} 
           sendPlay={this.getPlay}
           values={values}
-          // startFrame={start} 
-          // endFrame={end} 
-          // bars={[]}
-          // activeImageIndex={0}
-          // frames={[]}
-          // test={1}
-          // notCalled={true}
-          // loaded={false}
           />: null}
           <div className='SideBar' key='SideBar'>
             <div className='SwitchView'>
@@ -604,7 +541,7 @@ export class PlayVideoCopy extends Component {
                 videos.filter(video => video.cameraId !== this.state.cameraId)
                 .map(video=>
                   <div className="video-preview"  key={video.fileName} onClick={() => {
-                    this.setState({showPlayBack: false});
+                    // this.setState({showPlayBack: false});
                     switchView(video.cameraId);
                     this.setState({cameraId: video.cameraId});
                     this.setState({segmentHistories});
@@ -623,7 +560,7 @@ export class PlayVideoCopy extends Component {
             </div>
             <div className='timestamp'>
             <form className='TimeStamp' onSubmit={((e)=>{
-              this.setState({showPlayBack: false});
+              // this.setState({showPlayBack: false});
               submit(e);
               // this.setState({segmentHistories});
               // segmentHistories = [];
@@ -650,7 +587,7 @@ export class PlayVideoCopy extends Component {
                         <tr  id={"ROW"+segment.segmentId}  key={segment.segmentId} style={{"backgroundColor": segment.color}}>
                           <td  id={segment.segmentId}
                           onClick={() => {
-                            this.setState({showPlayBack: false});
+                            // this.setState({showPlayBack: false});
                             onSelect(segment.segmentId);
                             this.setState({cameraId});
                             this.setState({view});
@@ -668,7 +605,7 @@ export class PlayVideoCopy extends Component {
                             this.setState({VideoSegment});
                           })}
                           onClick={(() => {
-                            this.setState({showPlayBack: false});
+                            // this.setState({showPlayBack: false});
                             selectTimestamp("start", segment.segmentId);
                             this.setState({currentTime});
                           })} style={{"backgroundColor": segment.inColor}}></input></td>
@@ -680,32 +617,42 @@ export class PlayVideoCopy extends Component {
                             this.setState({VideoSegment});
                           })}
                           onClick={(() => {
-                            this.setState({showPlayBack: false});
+                            // this.setState({showPlayBack: false});
                             selectTimestamp("end", segment.segmentId);
                             this.setState({currentTime});
                           })} style={{"backgroundColor": segment.outColor}}></input></td>
                           <td><input className="check" type="checkbox" onChange={(() => {
-                            this.setState({showPlayBack: false});
+                            // this.setState({showPlayBack: false});
                             onCheck(segment.segmentId, segment.start, segment.end);
                             this.setState({segmentHistories});
                             this.setState({VideoSegment});
                           })} id={"CHECK"+String(segment.segmentId)} checked={segment.IsChecked}/></td>
                           <td><div onClick={
                             () => {
-                              if (showPlayBack) this.setState({showPlayBack: false});
-                              else {
+                              // if (showPlayBack) this.setState({showPlayBack: false});
+                              // else {
                                 onPlayback(segment.segmentId);
                                 this.setState({start});
                                 this.setState({end});
                                 if (start !== "" && end !== "") this.setState({showPlayBack: true});
                                 else alert("The IN and OUT points are empty!")
-                              }
+                              // }
                                 
                             }}><AiFillPlayCircle size={30}/></div></td>
                         </tr>
                       )
                   }
-                  <tr><td colSpan="5"><textarea placeholder="Looks like you segmented this task before. Why do you want to update it?"></textarea></td></tr>
+                  <tr><td colSpan="5">
+                    <label htmlFor="segmentor">Segmentor:  </label>
+                    <select id="segmentor" name="segmentor" onChange={()=>{
+                      updateSegmentor();
+                      this.setState({segmentHistories});
+                    }}>
+                      <option value="Grace">Grace</option>
+                      <option value="Tamim">Tamim</option>
+                    </select>
+                    {/* <textarea placeholder="Looks like you segmented this task before. Why do you want to update it?"></textarea> */}
+                  </td></tr>
                   <tr><td colSpan="5"><button type="submit" className='submit'>SUBMIT</button></td></tr>
                   </tbody>
                 </table>
@@ -714,7 +661,7 @@ export class PlayVideoCopy extends Component {
             </div>
             <div className='feedback'>
             <form className='Feedback' onSubmit={(e)=>{
-              this.setState({showPlayBack: false});
+              // this.setState({showPlayBack: false});
               submitFeedback(e);
               this.setState({Feedback});
             }}>
