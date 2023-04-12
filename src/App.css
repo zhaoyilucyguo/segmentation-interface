@@ -27,3 +27,8 @@ NavLink {
 .display-1{
   padding-left: 1.5%;
 }
+.todoTitle:hover,
+.doneTitle:hover {
+  color: rgb(0, 122, 204);
+  font-weight:bolder;
+}

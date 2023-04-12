@@ -20,13 +20,13 @@ export class PlayVideoCopy extends Component {
       PatientTaskHandMappingId: this.props.PTHID,
       TaskId: this.props.TASKID,
       PatientId: this.props.PATIENTID,
-      PatientCode: this.props.PATIENTCODE,
+      // PatientCode: this.props.PATIENTCODE,
       HandId: this.props.HANDID,
       IsSubmitted: this.props.IsSubmitted,
       segmentId: 1, // start at IPT
       SegmentJson: [],
       view: "",
-      // definition: "",
+      definition: "",
       currentTime: 0,
       cameraId: 0,
       prevSegmentId: 1,
@@ -41,7 +41,8 @@ export class PlayVideoCopy extends Component {
       frames: [],
       test: 1,
       notCalled: true,
-      loaded: false,      
+      loaded: false,    
+      TaskDescription: [],  
     }
 
     // this.render=this.render.bind(this);
@@ -83,6 +84,11 @@ export class PlayVideoCopy extends Component {
       if (this.state.TaskId >= 17) this.setState({ cameraId: 4});
       else this.setState({ cameraId: 2 });
     }
+    await axios.get(`http://localhost:5000/TaskDescription/` + this.state.TaskId)
+    .then(res => {
+      const TaskDescription =res.data;
+      this.setState({ TaskDescription });
+    }) 
 
     await axios.get(`http://localhost:5000/Segment`)
     .then(res => {
@@ -112,22 +118,27 @@ export class PlayVideoCopy extends Component {
       
       var cameraId = 0;
       var view = '';
+      var definition = "undefined";
       if (this.state.TaskId >= 17) {
         this.setState({ segmentId: 7 });
         this.setState({ prevSegmentId: 7 });
+        var Segment = this.state.SegmentJson.filter(view => view.id === 7)[0].SegmentLabel;
         cameraId = recommended_view.filter(view => view.segmentId === 7)[0].cameraId;
         view = recommended_view.filter(view => view.segmentId === 7)[0].viewType;
+        definition = Segment + ": " + recommended_view.filter(view => view.segmentId === 7)[0].definition;
       }
       else {
+        var Segment = this.state.SegmentJson.filter(view => view.id === parseInt(this.state.segmentId))[0].SegmentLabel;
         cameraId = recommended_view.filter(view => view.segmentId === this.state.segmentId)[0].cameraId;
         view = recommended_view.filter(view => view.segmentId === this.state.segmentId)[0].viewType;
+        definition = Segment + ": " + recommended_view.filter(view => view.segmentId === this.state.segmentId)[0].definition;
       }
-      // const definition = recommended_view.filter(view => view.segmentId === this.state.segmentId)[0].Definition;
-      // const definition = "undefined";
+      
+      
       this.setState({ recommended_view });
       this.setState({ cameraId });
       this.setState({ view });
-      // this.setState({ definition });'
+      this.setState({ definition });
       var VideoSegment = this.state.VideoSegment;
       // if (this.state.IsSubmitted === 0){
       if (VideoSegment.length === 0){
@@ -174,10 +185,11 @@ export class PlayVideoCopy extends Component {
       recommended_view,
       TaskId,
       PatientId,
-      PatientCode,
+      // PatientCode,
       HandId,
       PatientTaskHandMapping,
-      // definition,
+      PatientTaskHandMappingId,
+      definition,
       segmentId,
       Camera,
       Feedback,
@@ -217,6 +229,7 @@ export class PlayVideoCopy extends Component {
       if (btn1 === "OUT") val1 = segment1.end;
       var val2 = segment2.start;
       if (btn2 === "OUT") val2 = segment2.end;
+      console.log(val1, val2);
       if (val2){
         if (Math.abs(val1 - val2) > 2) {
           if (btn1 === "OUT") VideoSegment.filter(segment=> segment.segmentId === id1)[0]['outColor'] = "yellow";
@@ -281,6 +294,7 @@ export class PlayVideoCopy extends Component {
         var check = undefined;
         if (id === 6) check=3;
         else if (id === 5) check=6;
+        else if (id === 9) check=7;
         else if (id === 4) {
           if (VideoSegment.length > 4) check=5;
           else check=id-1;
@@ -307,7 +321,7 @@ export class PlayVideoCopy extends Component {
       prevSegmentId = segmentId;
       var Segment = SegmentJson.filter(view => view.id === parseInt(segmentId))[0].SegmentLabel;
       instruction="Please Select the IN and OUT Points for the Segment "+Segment;
-      // definition=recommended_view.filter(view => view.segmentId === segmentId)[0].Definition;
+      definition=Segment + ": " + recommended_view.filter(view => view.segmentId === segmentId)[0].definition;
       cameraId = recommended_view.filter(view => view.segmentId === parseInt(segmentId))[0].cameraId;
       VideoSegment.filter(segment => segment.segmentId === prevSegmentId)[0].cameraId = cameraId;
       view = recommended_view.filter(view => view.segmentId === parseInt(segmentId))[0].viewType;
@@ -327,26 +341,16 @@ export class PlayVideoCopy extends Component {
     }
     function changeTimestampColor(position, id){
       // VideoSegment.filter(segment => segment.segmentId === id)[0][position] = parseInt(e.target.value);
+      console.log("changetimestampcolorr");
       if (position === "start"){
-        console.log("Start");
-        if (id.length > 4) {
-          if (id === 3) changeColor(id, "OUT", 6, "IN");
-          else if (id === 6) changeColor(id, "OUT", 5, "IN");
-          else if (id === 5) changeColor(id, "OUT", 4, "IN");
-        }
-        else if (VideoSegment.length < 4) {
-          if (id === 7) changeColor(id, "OUT", 9, "IN");
-        }
-        else {
-          if (id !== 4) changeColor(id, "OUT", id+1, "IN");
-        }
-      }
-      else {
-        console.log("end");
+        console.log("Start");        
         if (VideoSegment.length > 4) {
           if (id === 6) changeColor(id, "IN", 3, "OUT");
           else if (id === 5) changeColor(id, "IN", 6, "OUT");
           else if (id === 4) changeColor(id, "IN", 5, "OUT");
+          else {
+            if (id !== 1) changeColor(id, "IN", id-1, "OUT");
+          }
         }
         else if (VideoSegment.length < 4) {
           if (id === 9) changeColor(id, "IN", 7, "OUT");
@@ -354,6 +358,24 @@ export class PlayVideoCopy extends Component {
         else {
           if (id !== 1) changeColor(id, "IN", id-1, "OUT");
         }
+      }
+      else {
+        console.log("end");
+        if (id.length > 4) {
+          if (id === 3) changeColor(id, "OUT", 6, "IN");
+          else if (id === 6) changeColor(id, "OUT", 5, "IN");
+          else if (id === 5) changeColor(id, "OUT", 4, "IN");
+          else {
+            changeColor(id, "OUT", id+1, "IN");
+          }
+        }
+        else if (VideoSegment.length < 4) {
+          if (id === 7) changeColor(id, "OUT", 9, "IN");
+        }
+        else {
+          if (id !== 4) changeColor(id, "OUT", id+1, "IN");
+        }
+        
       }
     }
     function onPlayback(segmentId) {
@@ -499,7 +521,7 @@ export class PlayVideoCopy extends Component {
               videos.filter(video => video.cameraId === this.state.cameraId)
               .map(video=>
                 <div className="video-play" key={video.fileName}>
-                  <h1>Patient {PatientCode}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View, Frame {document.getElementsByClassName("react-video-player")[0] ? Math.round(document.getElementsByClassName("react-video-player")[0].currentTime*30) : Math.round(currentTime*30)}</h1>
+                  <h1>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View, Frame {document.getElementsByClassName("react-video-player")[0] ? Math.round(document.getElementsByClassName("react-video-player")[0].currentTime*30) : Math.round(currentTime*30)}</h1>
                   <Video url={"./Videos/"+video.fileName} sendTime={this.getTime}></Video>
                 </div>
               )
@@ -523,6 +545,8 @@ export class PlayVideoCopy extends Component {
               }}>OUT</button>
               
             </div>
+            <h2>Task {TaskId}: {this.state.TaskDescription.scale} Subscale, {this.state.TaskDescription.definition}.</h2>
+            <h2>Segment {this.state.definition}.</h2>
           </div>
           { showPlayBack ? 
           <PlayBack 
@@ -551,7 +575,7 @@ export class PlayVideoCopy extends Component {
                   }}>
                     <video src={"./Videos/"+video.fileName} title={"./Videos/"+video.fileName} className="sidebarVideo"  id={video.View}></video>
                     <div>
-                      <h2>Patient {PatientCode}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h2>
+                      <h2>Patient {PatientId}, Task {TaskId}, {Camera.filter(view => view.id === video.cameraId)[0].ViewType} View</h2>
                     </div>
                   </div>
                 )
@@ -591,7 +615,7 @@ export class PlayVideoCopy extends Component {
                             onSelect(segment.segmentId);
                             this.setState({cameraId});
                             this.setState({view});
-                            // this.setState({definition});
+                            this.setState({definition});
                             this.setState({instruction});
                             this.setState({prevSegmentId});
                             this.setState({segmentId});
@@ -600,8 +624,9 @@ export class PlayVideoCopy extends Component {
                           <td><input className="text-center" value={segment.start} type="number" id={"IN"+String(segment.segmentId)} 
                           onChange={((e) => {
                             changeTimestamp(e, "start", segment.segmentId);
-                            this.setState({VideoSegment});
-                            changeTimestampColor("start", segment.segmentId);
+                            this.setState({VideoSegment}, ()=>{
+                              changeTimestampColor("start", segment.segmentId);
+                            });                            
                             this.setState({VideoSegment});
                           })}
                           onClick={(() => {
@@ -612,8 +637,9 @@ export class PlayVideoCopy extends Component {
                           <td><input className="text-center" value={segment.end} type="number" id={"OUT"+String(segment.segmentId)} 
                           onChange={((e) => {
                             changeTimestamp(e, "end", segment.segmentId);
-                            this.setState({VideoSegment});
-                            changeTimestampColor("end", segment.segmentId);
+                            this.setState({VideoSegment}, ()=>{
+                              changeTimestampColor("end", segment.segmentId);
+                            });   
                             this.setState({VideoSegment});
                           })}
                           onClick={(() => {
@@ -650,6 +676,7 @@ export class PlayVideoCopy extends Component {
                     }}>
                       <option value="Grace">Grace</option>
                       <option value="Tamim">Tamim</option>
+                      <option value="Aisling">Aisling</option>
                     </select>
                     {/* <textarea placeholder="Looks like you segmented this task before. Why do you want to update it?"></textarea> */}
                   </td></tr>

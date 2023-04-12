@@ -75,9 +75,7 @@ export class PlayBack extends Component {
         this.state.url,
         startSec,
         function(img, startSec, event) {
-          console.log("showimageat function");
           if (event.type === 'seeked') {
-            console.log("seeked");
               this.state.bars.push(img);
               this.state.frames.push(frame);
               if (document.getElementById("img")) {
@@ -85,11 +83,9 @@ export class PlayBack extends Component {
                 document.getElementById("img").appendChild(img);
               }
               if (this.state.endFrame >= ++frame) {
-                console.log("showimageat increment frame", "endframe", this.state.endFrame, "currentframe", frame);
                 this.showImageAt(frame);
               }
               else {
-                console.log("exit show imamge at")
                 return;
               }
           }
@@ -100,7 +96,6 @@ export class PlayBack extends Component {
     }
     
     componentDidMount(){
-      console.log("component did mount playback", this.state.showPlayBack);
       if (this.state.showPlayBack){
         if (document.getElementById("btn")) {
           document.getElementById("btn").style.display="none";
@@ -117,7 +112,6 @@ export class PlayBack extends Component {
         var interval = undefined;
         var wait = undefined;
         // if all the images are loaded
-        console.log("componentdidmount bar, end, start+1", this.state.bars.length, this.state.endFrame, this.state.startFrame+1)
         if (this.state.bars.length === this.state.endFrame - this.state.startFrame+1){
           // set a new interval to show the images at the rate of 50 micro sec per image
           interval = setInterval(()=>{
@@ -153,9 +147,7 @@ export class PlayBack extends Component {
           // if we haven't finished loading all images, we wait 
           
           wait = setInterval(()=>{
-            console.log(this.state.showPlayBack);
             if (this.state.showPlayBack){
-              console.log("wait");
               // exit wait and show images
               if (this.state.bars.length === this.state.endFrame - this.state.startFrame + 1) {
                 
@@ -177,7 +169,6 @@ export class PlayBack extends Component {
               }
               // continue wait
               else{
-                console.log("continue wait", "loaded", this.state.loaded, "end", this.state.endFrame, "start", this.state.startFrame, "bar", this.state.bars.length);
                 let test = this.state.test;
                 this.setState({
                   test: test+1
