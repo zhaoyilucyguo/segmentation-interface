@@ -15,6 +15,7 @@ export class PlayVideoCopy extends Component {
       videos: [],
       recommended_view: [],
       PatientTaskHandMapping1: [],
+      PatientTaskHandMapping:[],
       Camera: [],
       Feedback: [],
       PatientTaskHandMappingId: this.props.PTHID,
@@ -45,7 +46,7 @@ export class PlayVideoCopy extends Component {
       TaskDescription: [],  
     }
 
-    // this.render=this.render.bind(this);
+    this.nextPth=this.nextPth.bind(this);
 
   }
   checkColor(VideoSegment){
@@ -84,6 +85,12 @@ export class PlayVideoCopy extends Component {
       if (this.state.TaskId >= 17) this.setState({ cameraId: 4});
       else this.setState({ cameraId: 2 });
     }
+    axios.get(`http://localhost:5000/PatientTaskHandMapping`)
+    .then(res => {
+      const PatientTaskHandMapping =res.data;
+      console.log(PatientTaskHandMapping);
+      this.setState({ PatientTaskHandMapping });
+    })
     await axios.get(`http://localhost:5000/TaskDescription/` + this.state.TaskId)
     .then(res => {
       const TaskDescription =res.data;
@@ -114,6 +121,7 @@ export class PlayVideoCopy extends Component {
       const recommended_view = data['taskSegmentHandCameraMapping'];
       // const recommended_view = da ta['rec_view'].filter(view => view.taskId === this.state.TaskId);
       const videos = data['files'];
+      console.log(videos);
       this.setState({ videos });
       
       var cameraId = 0;
@@ -175,6 +183,25 @@ export class PlayVideoCopy extends Component {
   
   getPlay = (showPlayBack) => {
     this.setState({showPlayBack: showPlayBack});
+  }
+  nextPth(){
+    let pth = this.state.PatientTaskHandMappingId;
+    console.log(pth);
+    let index = this.state.PatientTaskHandMapping.findIndex(
+      function(obj){
+        return obj.id === pth;
+      })+1;
+    for(var i=index; i < this.state.PatientTaskHandMapping.length; i++) {
+      if (this.state.PatientTaskHandMapping[i].isSubmitted === false) {
+        this.setState({PatientTaskHandMappingId: i});
+        this.setState({TaskId: this.state.PatientTaskHandMapping[i].taskId});
+        this.setState({PatientId: this.state.PatientTaskHandMapping[i].patientId});
+        this.setState({HandId: this.state.PatientTaskHandMapping[i].handId});
+        this.setState({IsSubmitted: this.state.PatientTaskHandMapping[i].isSubmitted});
+        window.location.href="Segmentation" + i;
+        return;
+      }
+    }
   }
   render() {
 
@@ -693,7 +720,9 @@ export class PlayVideoCopy extends Component {
               this.setState({Feedback});
             }}>
               <div className='feedbackHeader'>
-              <h1>Feedback</h1>
+              <h1 
+              //onClick={()=>{this.nextPth()}}
+              >Feedback</h1>
                 </div>
               <table className='feedbackTable'>
                 <tbody>
