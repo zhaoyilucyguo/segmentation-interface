@@ -43,7 +43,7 @@ export class PlayVideoCopy extends Component {
       test: 1,
       notCalled: true,
       loaded: false,    
-      TaskDescription: [],  
+      TaskDescription: []
     }
 
     this.nextPth=this.nextPth.bind(this);
@@ -254,6 +254,7 @@ export class PlayVideoCopy extends Component {
       var segment2 = VideoSegment.filter(segment=> segment.segmentId === id2)[0];
       var val1 = segment1.start;
       if (btn1 === "OUT") val1 = segment1.end;
+      if (segment2 === undefined) return;
       var val2 = segment2.start;
       if (btn2 === "OUT") val2 = segment2.end;
       console.log(val1, val2);
@@ -701,9 +702,10 @@ export class PlayVideoCopy extends Component {
                       updateSegmentor();
                       this.setState({segmentHistories});
                     }}>
+                      <option value="Aisling">Aisling</option>
                       <option value="Grace">Grace</option>
                       <option value="Tamim">Tamim</option>
-                      <option value="Aisling">Aisling</option>
+                      
                     </select>
                     {/* <textarea placeholder="Looks like you segmented this task before. Why do you want to update it?"></textarea> */}
                   </td></tr>
