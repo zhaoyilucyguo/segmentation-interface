@@ -20,7 +20,8 @@ class Home extends Component{
 componentDidMount() {
     axios.get(`http://localhost:5000/PatientTaskHandMapping`)
     .then(res => {
-      const PatientTaskHandMapping =res.data;
+      var PatientTaskHandMapping =res.data; 
+      PatientTaskHandMapping=PatientTaskHandMapping.filter(list => list.isImpaired === true);
       this.setState({ PatientTaskHandMapping });
     })
 }
