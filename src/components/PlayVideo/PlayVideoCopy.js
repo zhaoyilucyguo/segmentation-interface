@@ -87,7 +87,8 @@ export class PlayVideoCopy extends Component {
     }
     axios.get(`http://localhost:5000/PatientTaskHandMapping`)
     .then(res => {
-      const PatientTaskHandMapping =res.data;
+      var PatientTaskHandMapping =res.data; 
+      PatientTaskHandMapping=PatientTaskHandMapping.filter(list => list.isImpaired === true);
       console.log(PatientTaskHandMapping);
       this.setState({ PatientTaskHandMapping });
     })
@@ -186,20 +187,21 @@ export class PlayVideoCopy extends Component {
   }
   nextPth(){
     let pth = this.state.PatientTaskHandMappingId;
-    console.log(pth);
     let index = this.state.PatientTaskHandMapping.findIndex(
       function(obj){
         return obj.id === pth;
-      })+1;
+      })+2;
     for(var i=index; i < this.state.PatientTaskHandMapping.length; i++) {
-      if (this.state.PatientTaskHandMapping[i].isSubmitted === false) {
-        this.setState({PatientTaskHandMappingId: i});
-        this.setState({TaskId: this.state.PatientTaskHandMapping[i].taskId});
-        this.setState({PatientId: this.state.PatientTaskHandMapping[i].patientId});
-        this.setState({HandId: this.state.PatientTaskHandMapping[i].handId});
-        this.setState({IsSubmitted: this.state.PatientTaskHandMapping[i].isSubmitted});
-        window.location.href="Segmentation" + i;
-        return;
+      if (this.state.PatientTaskHandMapping[i].isImpaired === true){
+        if (this.state.PatientTaskHandMapping[i].isSubmitted === false) {
+          // this.setState({PatientTaskHandMappingId: i});
+          // this.setState({TaskId: this.state.PatientTaskHandMapping[i].taskId});
+          // this.setState({PatientId: this.state.PatientTaskHandMapping[i].patientId});
+          // this.setState({HandId: this.state.PatientTaskHandMapping[i].handId});
+          // this.setState({IsSubmitted: this.state.PatientTaskHandMapping[i].isSubmitted});
+          window.location.href="Segmentation" + this.state.PatientTaskHandMapping[i].id;
+          return;
+        }
       }
     }
   }
@@ -614,6 +616,7 @@ export class PlayVideoCopy extends Component {
             <form className='TimeStamp' onSubmit={((e)=>{
               // this.setState({showPlayBack: false});
               submit(e);
+              this.nextPth();
               // this.setState({segmentHistories});
               // segmentHistories = [];
               
@@ -723,7 +726,7 @@ export class PlayVideoCopy extends Component {
             }}>
               <div className='feedbackHeader'>
               <h1 
-              //onClick={()=>{this.nextPth()}}
+              // onClick={()=>{this.nextPth()}}
               >Feedback</h1>
                 </div>
               <table className='feedbackTable'>
