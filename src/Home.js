@@ -15,17 +15,22 @@ class Home extends Component{
       PatientTaskHandMapping: [],
       display: "block"
     }
-    // this.render=this.render.bind(this);
 }
 componentDidMount() {
-    axios.get(`http://localhost:5000/PatientTaskHandMapping`)
-    .then(res => {
-      var PatientTaskHandMapping =res.data; 
-      PatientTaskHandMapping=PatientTaskHandMapping.filter(list => list.isImpaired === true);
-      this.setState({ PatientTaskHandMapping });
-    })
+  axios.get(`http://localhost:5000/PatientTaskHandMapping`)
+  .then(res => {
+    var PatientTaskHandMapping =res.data; 
+    PatientTaskHandMapping=PatientTaskHandMapping.filter(list => list.isImpaired === true);
+    //PatientTaskHandMapping = this.shuffleArray(PatientTaskHandMapping);
+    PatientTaskHandMapping = PatientTaskHandMapping.slice();
+    for (let i = PatientTaskHandMapping.length - 1; i > 0; i--) {
+      const randomIndex = Math.floor(Math.random() * (i + 1));
+      [PatientTaskHandMapping[i], PatientTaskHandMapping[randomIndex]] = [PatientTaskHandMapping[randomIndex], PatientTaskHandMapping[i]];
+    }
+    //console.log(PatientTaskHandMapping);
+    this.setState({ PatientTaskHandMapping });
+  })
 }
-
   render(){
     function navTo(){
       document.getElementsByTagName("ul")[0].style.display="none";

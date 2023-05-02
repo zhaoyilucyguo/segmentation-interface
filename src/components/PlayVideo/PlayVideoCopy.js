@@ -15,12 +15,12 @@ export class PlayVideoCopy extends Component {
       videos: [],
       recommended_view: [],
       PatientTaskHandMapping1: [],
-      PatientTaskHandMapping:[],
       Camera: [],
       Feedback: [],
       PatientTaskHandMappingId: this.props.PTHID,
       TaskId: this.props.TASKID,
       PatientId: this.props.PATIENTID,
+      PatientTaskHandMapping: [],
       // PatientCode: this.props.PATIENTCODE,
       HandId: this.props.HANDID,
       IsSubmitted: this.props.IsSubmitted,
@@ -85,13 +85,6 @@ export class PlayVideoCopy extends Component {
       if (this.state.TaskId >= 17) this.setState({ cameraId: 4});
       else this.setState({ cameraId: 2 });
     }
-    axios.get(`http://localhost:5000/PatientTaskHandMapping`)
-    .then(res => {
-      var PatientTaskHandMapping =res.data; 
-      PatientTaskHandMapping=PatientTaskHandMapping.filter(list => list.isImpaired === true);
-      console.log(PatientTaskHandMapping);
-      this.setState({ PatientTaskHandMapping });
-    })
     await axios.get(`http://localhost:5000/TaskDescription/` + this.state.TaskId)
     .then(res => {
       const TaskDescription =res.data;
@@ -122,7 +115,7 @@ export class PlayVideoCopy extends Component {
       const recommended_view = data['taskSegmentHandCameraMapping'];
       // const recommended_view = da ta['rec_view'].filter(view => view.taskId === this.state.TaskId);
       const videos = data['files'];
-      console.log(videos);
+      console.log(recommended_view);
       this.setState({ videos });
       
       var cameraId = 0;
@@ -175,6 +168,19 @@ export class PlayVideoCopy extends Component {
       .then(res => {
         const Feedback =res.data;
         this.setState({ Feedback });
+    })
+    axios.get(`http://localhost:5000/PatientTaskHandMapping`)
+    .then(res => {
+      var PatientTaskHandMapping =res.data; 
+      PatientTaskHandMapping=PatientTaskHandMapping.filter(list => list.isImpaired === true);
+      //PatientTaskHandMapping = this.shuffleArray(PatientTaskHandMapping);
+      PatientTaskHandMapping = PatientTaskHandMapping.slice();
+      for (let i = PatientTaskHandMapping.length - 1; i > 0; i--) {
+        const randomIndex = Math.floor(Math.random() * (i + 1));
+        [PatientTaskHandMapping[i], PatientTaskHandMapping[randomIndex]] = [PatientTaskHandMapping[randomIndex], PatientTaskHandMapping[i]];
+      }
+      //console.log(PatientTaskHandMapping);
+      this.setState({ PatientTaskHandMapping });
     })
   }
   getTime = (currentTime) => {
