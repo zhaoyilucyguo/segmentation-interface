@@ -712,6 +712,7 @@ export class PlayVideoCopy extends Component {
                       this.setState({segmentHistories});
                     }}>
                       <option value="Aisling">Aisling</option>
+                      <option value="Ania">Ania</option>
                       <option value="Grace">Grace</option>
                       <option value="Tamim">Tamim</option>
                       
