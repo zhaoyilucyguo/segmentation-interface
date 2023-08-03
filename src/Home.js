@@ -57,14 +57,14 @@ componentDidMount() {
             document.getElementsByClassName("doneTask")[0].style.display='none';
             document.getElementsByClassName("todoTask")[0].style.display='block';
           }}>
-            <h1>{this.state.PatientTaskHandMapping.filter(list => list.isSubmitted === false).length}</h1>
+            <h1>{this.state.PatientTaskHandMapping.filter(list => list.isSubmitted === false && list.taskId <= 4).length}</h1>
             <h3>Tasks To Do</h3> 
           </div>
         </div>
       </div>
       <ul className='todoTask'>
       {
-        this.state.PatientTaskHandMapping.filter(list => list.isSubmitted === false)
+        this.state.PatientTaskHandMapping.filter(list => list.isSubmitted === false && list.taskId <= 4)
         .map
         (
             list=>
@@ -82,7 +82,7 @@ componentDidMount() {
         </ul>  
      <ul className='doneTask'>
      {
-        this.state.PatientTaskHandMapping.filter(list => list.isSubmitted === true)
+        this.state.PatientTaskHandMapping.filter(list => list.isSubmitted === true && list.taskId <= 4)
         .map
         (
             list=>

@@ -543,10 +543,10 @@ export class PlayVideoCopy extends Component {
         j++;
         
       }
-
       let model = { 'submittedSegments' : submittedSegments, 'segmentHistories': segmentHistories}
       await axios.post('http://localhost:5000/VideoSegment/', model);
       await window.location.reload(false); 
+      this.nextPth();
     }
     return (
 
@@ -622,7 +622,7 @@ export class PlayVideoCopy extends Component {
             <form className='TimeStamp' onSubmit={((e)=>{
               // this.setState({showPlayBack: false});
               submit(e);
-              this.nextPth();
+              
               // this.setState({segmentHistories});
               // segmentHistories = [];
               
@@ -711,10 +711,10 @@ export class PlayVideoCopy extends Component {
                       updateSegmentor();
                       this.setState({segmentHistories});
                     }}>
-                      <option value="Aisling">Aisling</option>
+                      <option value="Tamim">Tamim</option>                      
                       <option value="Ania">Ania</option>
                       <option value="Grace">Grace</option>
-                      <option value="Tamim">Tamim</option>
+                      
                       
                     </select>
                     {/* <textarea placeholder="Looks like you segmented this task before. Why do you want to update it?"></textarea> */}
